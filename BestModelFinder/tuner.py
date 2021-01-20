@@ -106,6 +106,28 @@ class ModelFinder:
                 'BaggingClassifier creation failed. Exited the getBestBaggingClassifier method of the Model_Finder class')
             raise Exception()
 
+    def bestOnvsRestClassifierModel(self, trainX, trainY):
+
+        self.logger_object.log(self.file_object,
+            'Entered in the bestOnevsRestClassifier of the ModelFinder class')
+
+        try:
+            self.xgBoost = self.getBestParamsForXgBoost(trainX, trainY)
+            self.ovrModel = OneVsRestClassifier(self.xgBoost)
+            self.ovrModel.fit(trainX, trainY)
+
+            self.logger_object.log(self.file_object,
+                'Exited from bestOnevsRestClassifier of the ModelFinder class')
+
+            return self.ovrModel
+        except Exception as e:
+            self.logger_object.log(self.file_object,
+                'Exception occured in bestOnevsRestClassifier method of the Model_Finder class. Exception message:  ' + str(e))
+            self.logger_object.log(self.file_object,
+                'OnevsRstClassifier creation failed. Exited the bestOnevsRestClassifier method of the Model_Finder class')
+            raise Exception()
+
+
     def getBestModel(self. trainX, trainY, testX, testY):
 
         self.logger_object.log(self.file_object,
@@ -121,6 +143,9 @@ class ModelFinder:
             self.baggingClassifier = self.getBestBaggingClassifier(trainX, trainY)
             self.predictionBClassifier = self.baggingClassifier(testX, testY)
 
+            self.ovrModel = self.bestOnvsRestClassifierModel(trainX, trainY)
+            self.predictionOVR = self.ovrModel.predict(testX, testY)
+
             if len(testY.unique()) == 1:
                 self.xgBoostScore = accuracy_score(testY, self.predictionXgBoost)
                 self.logger_object.log(self.file_object, 
@@ -133,6 +158,10 @@ class ModelFinder:
                 self.BClassifierScore = accuracy_score(testY, self.predictionBClassifier)
                 self.logger_object.log(self.file_object,
                     'Accuracy Score of BClassifier: ' + str(self.BClassifierScore))
+                
+                self.ovrScore = accuracy_score(testY, self.predictionOVR)
+                self.logger_object.log(self.file_object,
+                    'Accuracy Score of ovrModel: ' + str(self.ovrScore))
             else:
                 self.xgBoostScore = roc_auc_score(testY, self.predictionXgBoost)
                 self.logger_object.log(self.file_object,
@@ -146,12 +175,24 @@ class ModelFinder:
                 self.logger_object.log(self.file_object,
                     'RocAuc Score of BClassifier: ' + str(self.BClassifierScore))
 
-            if self.randomForestScore > self.xgBoostScore and self.randomForestScore > self.BClassifierScore:
-                return 'RandomForest', self.randomForest
-            elif self.xgBoostScore > self.randomForestScore and self.xgBoostScore > self.BClassifierScore:
-                return 'XgBoost', self.xgBoost
+                self.ovrScore = roc_auc_score(testY, self.predictionOVR)
+                self.logger_object.log(self.file_object,
+                    'RocAuc Score of ovrModel: ' + str(self.ovrScore))
+
+            if self.randomForestScore > self.xgBoostScore and 
+                self.randomForestScore > self.BClassifierScore and
+                self.randomForestScore > self.ovrScore:
+                    return 'RandomForest', self.randomForest
+            elif self.xgBoostScore > self.randomForestScore and 
+                self.xgBoostScore > self.BClassifierScore and
+                self.xgBoostScore > self.ovrScore:
+                    return 'XgBoost', self.xgBoost
+            elif self.BClassifierScore > self.randomForestScore and 
+                self.BClassifierScore > self.xgBoostScore and
+                self.BClassifierScore > self.ovrScore:
+                    return 'BClassifierScore', self.baggingClassifier
             else:
-                return 'BaggingClassifier', self.baggingClassifier
+                return 'OnevsRestClassifier', self.ovrModel
 
         except Exception as e:
             self.logger_object.log(self.file_object,
