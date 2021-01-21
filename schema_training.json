@@ -1,6 +1,6 @@
 {
-    "SampleFileName": "Review_01012020.csv",
-    "LengthOFDateStampInFile": 8,
+    "SampleFileName": "Review_1611238440.csv",
+    "LengthOFDateStampInFile": 10,
     "NumberOfColumn": 2,
     "ColName" : {
         "Comment" : "varchar",
