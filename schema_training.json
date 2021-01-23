@@ -3,7 +3,7 @@
     "LengthOFDateStampInFile": 10,
     "NumberOfColumn": 2,
     "ColName" : {
-        "Comment" : "varchar",
-        "Rating": "varchar"
+        "Comments" : "varchar",
+        "Ratings": "varchar"
     }
 }

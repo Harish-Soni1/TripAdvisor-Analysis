@@ -5,7 +5,7 @@ from os import listdir
 import os
 import csv
 import json
-from application_logging.logger import App_Logger
+from ApplicationLogging.logger import AppLogger
 
 class dBOperation:
  
@@ -14,12 +14,12 @@ class dBOperation:
         self.badFilePath = "TrainingRawFilesValidated/BadRaw"
         self.goodFilePath = "TrainingRawFilesValidated/GoodRaw"
         self.client = pymongo.MongoClient("mongodb://127.0.0.1:27017")
-        self.logger = App_Logger()
+        self.logger = AppLogger()
 
     def dataBaseConnection(self, DatabaseName):
 
         try:
-            conn = self.client[self.path + DatabaseName] 
+            conn = self.client[DatabaseName] 
             file = open("TrainingLogs/DataBaseConnectionLog.txt", 'a+')
             self.logger.log(file, "Opened %s database successfully" % DatabaseName)
             file.close()
