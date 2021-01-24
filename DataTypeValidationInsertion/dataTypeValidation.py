@@ -4,7 +4,6 @@ from datetime import datetime
 from os import listdir
 import os
 import csv
-import json
 from ApplicationLogging.logger import AppLogger
 
 class dBOperation:
@@ -38,12 +37,35 @@ class dBOperation:
             conn = self.dataBaseConnection(DatabaseName)
             collectionList = conn.collection_names()
 
-            if "Training" in collectionList:
-                
+            if "GoodRawData" in collectionList:
+
+                allData = conn.Training.find({}, {"_id": 0, "Comments": 1, "Ratings": 1})
+                if allData.count == 0:
+                    self.client.close()
+
+                    file = open("TrainingLogs/DataBaseCollectionCreateLog.txt", 'a+')
+                    self.logger.log(file, "Collection Already Exists!!")
+                    file.close()
+
+                    file = open("TrainingLogs/DataBaseInsertLog.txt", 'a+')
+                    self.logger.log(file, "No Data Found!!")
+                    file.close()
+
+                    file = open("TrainingLogs/DataBaseConnectionLog.txt", 'a+')
+                    self.logger.log(file, "Closed %s database successfully" % DatabaseName)
+                    file.close()
+
+                    return
+
+                conn.Training.remove()
                 self.client.close()
                 
                 file = open("TrainingLogs/DataBaseCollectionCreateLog.txt", 'a+')
-                self.logger.log(file, "Collection created successfully!!")
+                self.logger.log(file, "Collection Already Exists!!")
+                file.close()
+
+                file = open("TrainingLogs/DataBaseInsertLog.txt", 'a+')
+                self.logger.log(file, "Data Deletion Successfully!!")
                 file.close()
 
                 file = open("TrainingLogs/DataBaseConnectionLog.txt", 'a+')
@@ -59,8 +81,8 @@ class dBOperation:
             
                 self.client.close()
 
-                file = open("TrainingLogs/DataBaseTableCreateLog.txt", 'a+')
-                self.logger.log(file, "Table created successfully!!")
+                file = open("TrainingLogs/DataBaseCollectionCreateLog.txt", 'a+')
+                self.logger.log(file, "Collection created successfully!!")
                 file.close()
 
                 file = open("TrainingLogs/DataBaseConnectionLog.txt", 'a+')
@@ -68,7 +90,7 @@ class dBOperation:
                 file.close()
 
         except Exception as e:
-            file = open("TrainingLogs/DataBaseTableCreateLog.txt", 'a+')
+            file = open("TrainingLogs/DataBaseCollectionCreateLog.txt", 'a+')
             self.logger.log(file, "Error while creating table: %s " % e)
             file.close()
             
@@ -79,20 +101,17 @@ class dBOperation:
             file.close()
             raise e
 
-
     def insertIntoTableGoodData(self,Database):
 
         conn = self.dataBaseConnection(Database)
         goodFilePath= self.goodFilePath
         badFilePath = self.badFilePath
-        onlyfiles = [f for f in listdir(goodFilePath)]
-        log_file = open("TrainingLogs/DataBaseInsertLog.txt", 'a+')
+        onlyfiles = [file for file in listdir(goodFilePath)]
+        logFile = open("TrainingLogs/DataBaseInsertLog.txt", 'a+')
 
         for file in onlyfiles:
             try:
-                conn.Training.drop()
-
-                with open(goodFilePath+'/'+file, "r") as csvFile:
+                with open(goodFilePath + '/' + file, "r") as csvFile:
                     next(csvFile)
                     reader = csv.DictReader(csvFile)
                     for line in reader:
@@ -106,11 +125,11 @@ class dBOperation:
 
             except Exception as e:
 
-                self.logger.log(log_file,"Error while creating table: %s " % e)
-                shutil.move(goodFilePath+'/' + file, badFilePath)
+                self.logger.log(logFile,"Error while creating table: %s " % e)
+                shutil.move(goodFilePath + '/' + file, badFilePath)
                 
-                self.logger.log(log_file, "File Moved Successfully %s" % file)
-                log_file.close()
+                self.logger.log(logFile, "File Moved Successfully %s" % file)
+                logFile.close()
                 
                 self.client.close()
 
@@ -125,21 +144,18 @@ class dBOperation:
 
         try:
             conn = self.dataBaseConnection(Database)
-            sqlSelect = "SELECT * FROM GoodRawData"
-            cursor = conn.cursor()
+            allData = conn.Training.find({}, {"_id": 0, "Comments": 1, "Ratings": 1})
 
-            cursor.execute(sqlSelect)
-
-            results = cursor.fetchall()
-            headers = [i[0] for i in cursor.description]
+            if allData.count == 0:
+                return
 
             if not os.path.isdir(self.fileFromDb):
                 os.makedirs(self.fileFromDb)
 
-            csvFile = csv.writer(open(self.fileFromDb + self.fileName, 'w', newline=''),delimiter=',', lineterminator='\r\n',quoting=csv.QUOTE_ALL, escapechar='\\')
-
+            headers = list(allData[0].keys())
+            csvFile = csv.DictWriter(open(self.fileFromDb + self.fileName, 'w', newline=''),delimiter=',', lineterminator='\r\n',quoting=csv.QUOTE_ALL, escapechar='\\')
             csvFile.writerow(headers)
-            csvFile.writerows(results)
+            csvFile.writerows(allData)
 
             self.logger.log(log_file, "File exported successfully!!!")
             log_file.close()
