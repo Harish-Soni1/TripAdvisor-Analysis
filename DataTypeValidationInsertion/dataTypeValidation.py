@@ -31,7 +31,7 @@ class dBOperation:
 
         return conn
 
-    def createTableDb(self,DatabaseName,column_names):
+    def createTableDb(self,DatabaseName):
 
         try:
             conn = self.dataBaseConnection(DatabaseName)

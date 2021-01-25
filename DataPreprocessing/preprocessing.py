@@ -21,12 +21,14 @@ class Preprocessor:
             'Entered in the removeColumn of the Preprocessor class')
 
         self.data = data
-        self.columns = columns
+        self.columns = columns[0]
 
         try:
-            self.usefullData = self.data.drop(labels = self.columns, axis = 1)
-            self.logger_object.log(self.file_object, 
-                'Column Removal Succesfull. Exited to the removeColumn of the Preprocessor class')
+
+            if self.columns in self.data.columns:
+                self.usefullData = self.data.drop(labels = self.columns, axis = 1)
+                self.logger_object.log(self.file_object, 
+                    'Column Removal Succesfull. Exited to the removeColumn of the Preprocessor class')    
             
             return self.usefullData
         except Exception as e:
@@ -180,25 +182,7 @@ class Preprocessor:
             self.logger_object.log(self.file_object,
                 'Finding Missing Unsuccesfull. Exited to the isNullPresent of the Preprocessor class')
             raise Exception()
-
-    def impute_missing_values(self, data):
         
-        self.logger_object.log(self.file_object, 'Entered the impute_missing_values method of the Preprocessor class')
-        self.data= data
-        try:
-            imputer=KNNImputer(n_neighbors=3, weights='uniform',missing_values=np.nan)
-            self.new_array=imputer.fit_transform(self.data)
-            self.new_data=pd.DataFrame(data=self.new_array, columns=self.data.columns)
-            self.logger_object.log(self.file_object, 
-                'Imputing missing values Successful. Exited the impute_missing_values method of the Preprocessor class')
-            
-            return self.new_data
-        except Exception as e:
-            self.logger_object.log(self.file_object,'Exception occured in impute_missing_values method of the Preprocessor class. Exception message:  ' + str(e))
-            self.logger_object.log(self.file_object,
-                'Imputing missing values failed. Exited the impute_missing_values method of the Preprocessor class')
-            raise Exception()
-
 
 def toWordNet(nltk_tag):
     if nltk_tag.startswith('J'):

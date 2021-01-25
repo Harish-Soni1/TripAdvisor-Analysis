@@ -128,7 +128,7 @@ class ModelFinder:
             raise Exception()
 
 
-    def getBestModel(self. trainX, trainY, testX, testY):
+    def getBestModel(self, trainX, trainY, testX, testY):
 
         self.logger_object.log(self.file_object,
             'Entered the getBestMode of the ModelFindef class')
