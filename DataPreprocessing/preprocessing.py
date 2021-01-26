@@ -1,6 +1,8 @@
 import pandas as pd
 import nltk
-from nltk.stem import LancasterStemmer, WordNetLemmatizer, PorterStemmer
+from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 from nltk import FreqDist
 nltk.download('stopwords')
 nltk.download('wordnet')
@@ -14,6 +16,8 @@ class Preprocessor:
     def __init__(self, file_object, logger_object):
         self.file_object = file_object
         self.logger_object = logger_object
+        self.vect = CountVectorizer()
+        self.tfidf = TfidfTransformer()
 
     def removeColumns(self, data, columns):
 
@@ -97,7 +101,6 @@ class Preprocessor:
             'Entered in the Lemmatizer of the Preprocessor class')
 
         self.data = data
-        self.lemm = WordNetLemmatizer()
 
         try:
             self.newData = self.data.apply(lambda x: lemmatizeText(x))
@@ -176,12 +179,38 @@ class Preprocessor:
                 return self.isNull
             else:
                 self.logger_object.log(self.file_object, 
-                    'Finding Missing Unsuccesfull. Exited to the isNullPresent of the Preprocessor class')
+                    'No Null Values Present. Exited to the isNullPresent of the Preprocessor class')
         except Exception as e:
             self.logger_object.log(self.file_object,'Exception occured in isNullPresent method of the Preprocessor class. Exception message:  '+str(e))
             self.logger_object.log(self.file_object,
                 'Finding Missing Unsuccesfull. Exited to the isNullPresent of the Preprocessor class')
             raise Exception()
+
+    def vectorizeText(self, trainX, testX):
+        self.logger_object.log(self.file_object,
+            'Entered in the vectorizeText of the Preprocessor class')
+        
+        self.trainX = trainX
+        self.testX = testX
+
+        try:
+            self.trainX = self.vect.fit_transform(self.trainX)
+            self.testX = self.vect.transform(self.testX)
+
+            self.trainX = self.tfidf.fit_transform(self.trainX)
+            self.testX = self.tfidf.transform(self.testX)
+            self.trainX = self.trainX.toarray()
+            self.testX = self.testX.toarray()
+
+            self.logger_object.log(self.file_object,
+                'Vectorize Text Succesfull. Exited to the vectorizeText of the Preprocessor class')
+            return self.trainX, self.testX
+
+        except Exception as e:
+            self.logger_object.log(self.file_object,'Exception occured in vectorizeText method of the Preprocessor class. Exception message:  '+str(e))
+            self.logger_object.log(self.file_object,
+                'Vectorize Text Unsuccesfull. Exited to the isNullPresent of the Preprocessor class')
+        raise Exception()
         
 
 def toWordNet(nltk_tag):
@@ -197,6 +226,7 @@ def toWordNet(nltk_tag):
         return None
 
 def lemmatizeText(text):
+    lemm = WordNetLemmatizer()
     nltk_tagged = nltk.pos_tag(text)
     wordnet_tagged = map(lambda x: (x[0], toWordNet(x[1])), nltk_tagged)
     lemm_sentence = []
@@ -209,4 +239,4 @@ def lemmatizeText(text):
 
 
 def stringifyData(text):
-    return ' '.join([str(elem) for elem in text)
+    return ' '.join(str(elem) for elem in text)

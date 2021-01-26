@@ -117,7 +117,7 @@ class RawDataValidation:
                 
                 files = os.listdir(source)
                 for file in files:
-                    if not in os.listdir(destPath):
+                    if file not in os.listdir(destPath):
                         shutil.move(source + file, destPath)
 
                 file = open("TrainingLogs/GeneralLog.txt", 'a+')

@@ -22,8 +22,8 @@ class FileOperations:
             else:
                 os.mkdir(path)
 
-            with open(path + "/" + filename + ".sav", 'wb') as file
-            pickle.dump(model, file)
+            with open(path + "/" + filename + ".sav", 'wb') as file:
+                pickle.dump(model, file)
             
             self.logger_object.log(self.file_object,
                 'Model File '+filename+' saved. Exited the save_model method of the Model_Finder class')
@@ -42,9 +42,9 @@ class FileOperations:
             'Entered in the loadModel of the FileOperation class')
 
         try:
-            with open(self.modelDirectory + filename + "/" + filename + ".sav", 'rb') as file
+            with open(self.modelDirectory + filename + "/" + filename + ".sav", 'rb') as file:
             
-            self.logger_object.log(self.file_object,
+                self.logger_object.log(self.file_object,
                     'Model File ' + filename + ' loaded. Exited the load_model method of the Model_Finder class')
             
             return pickle.load(file)

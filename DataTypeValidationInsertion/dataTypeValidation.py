@@ -73,11 +73,7 @@ class dBOperation:
                 file.close()
 
             else:
-                conn.create_collection("GoodRawData",
-                {
-                    Comments: <string>,
-                    Ratings: <string>
-                })
+                conn.create_collection("GoodRawData")
             
                 self.client.close()
 

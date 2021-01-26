@@ -16,15 +16,14 @@ class dataTransform:
                if data is None:
                     onlyfiles = [f for f in listdir(self.goodDataPath)]
                     for file in onlyfiles:
-
-                    csv = pandas.read_csv(self.goodDataPath+"/" + file)
-                    csv.fillna('NULL',inplace=True)
-                    csv['Wafer'] = csv['Wafer'].str[6:]
-                    csv.to_csv(self.goodDataPath+ "/" + file, index=None, header=True)
-                    self.logger.log(log_file," %s: File Transformed successfully!!" % file)
+                         csv = pandas.read_csv(self.goodDataPath+"/" + file)
+                         csv.fillna('NULL',inplace=True)
+                         csv['Wafer'] = csv['Wafer'].str[6:]
+                         csv.to_csv(self.goodDataPath+ "/" + file, index=None, header=True)
+                         self.logger.log(log_file," %s: File Transformed successfully!!" % file)
                else:
                     data = data.fillna('Null', inplace = True)
-                    self.logger.log(log_file," %s: File Transformed successfully!!" % file)
+                    self.logger.log(log_file," %s: File Transformed successfully!!" % log_file)
                     return data
           except Exception as e:
                self.logger.log(log_file, "Data Transformation failed because:: %s" % e)
