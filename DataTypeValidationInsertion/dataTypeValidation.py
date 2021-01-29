@@ -1,6 +1,7 @@
 import shutil
 import pymongo
 from datetime import datetime
+import pandas as pd
 from os import listdir
 import os
 import csv
@@ -9,9 +10,8 @@ from ApplicationLogging.logger import AppLogger
 class dBOperation:
  
     def __init__(self):
-        self.path = 'TrainingDatabase/'
-        self.badFilePath = "TrainingRawFilesValidated/BadRaw"
-        self.goodFilePath = "TrainingRawFilesValidated/GoodRaw"
+        self.badFilePath = "TrainingRawfilesValidated/BadRaw/"
+        self.goodFilePath = "TrainingRawfilesValidated/GoodRaw/"
         self.client = pymongo.MongoClient("mongodb://127.0.0.1:27017")
         self.logger = AppLogger()
 
@@ -39,8 +39,8 @@ class dBOperation:
 
             if "GoodRawData" in collectionList:
 
-                allData = conn.Training.find({}, {"_id": 0, "Comments": 1, "Ratings": 1})
-                if allData.count == 0:
+                allData = conn.GoodRawData.find({}, {"_id": 0, "Comments": 1, "Ratings": 1})
+                if allData.count() == 0:
                     self.client.close()
 
                     file = open("TrainingLogs/DataBaseCollectionCreateLog.txt", 'a+')
@@ -57,7 +57,7 @@ class dBOperation:
 
                     return
 
-                conn.Training.remove()
+                conn.GoodRawData.remove()
                 self.client.close()
                 
                 file = open("TrainingLogs/DataBaseCollectionCreateLog.txt", 'a+')
@@ -100,63 +100,55 @@ class dBOperation:
     def insertIntoTableGoodData(self,Database):
 
         conn = self.dataBaseConnection(Database)
-        goodFilePath= self.goodFilePath
-        badFilePath = self.badFilePath
-        onlyfiles = [file for file in listdir(goodFilePath)]
         logFile = open("TrainingLogs/DataBaseInsertLog.txt", 'a+')
 
-        for file in onlyfiles:
-            try:
-                with open(goodFilePath + '/' + file, "r") as csvFile:
-                    next(csvFile)
-                    reader = csv.DictReader(csvFile)
-                    for line in reader:
-                        row = {}
-                        for field in ['Comments', 'Ratings']:
-                            try:
-                                row[field] = line[field]
-                            except Exception as e:
-                                raise e
-                        conn.Training.insert(row)
-
-            except Exception as e:
-
-                self.logger.log(logFile,"Error while creating table: %s " % e)
-                shutil.move(goodFilePath + '/' + file, badFilePath)
-                
-                self.logger.log(logFile, "File Moved Successfully %s" % file)
-                logFile.close()
-                
-                self.client.close()
-
+        onlyfiles = [file for file in os.listdir(self.goodFilePath)]
+        if onlyfiles:
+            for f in onlyfiles:
+                try:
+                    data = pd.read_csv(os.path.join(self.goodFilePath, f))
+                    document = [{'Comments': rating, 'Ratings': label} for rating, label in zip(data['Comments'], data['Ratings'])]
+                    conn.GoodRawData.insert_many(document)
+                except Exception as e:
+                    self.logger.log(logFile, "Insertion in Collection Failed. Error: %s" %e)
+                    self.logger.log(logFile, "Insertion in Collection Successfully.")
+                    logFile.close()
+        else:
+            print("No files")
         self.client.close()
-        log_file.close()
+
+        self.logger.log(logFile, "Insertion in Collection Successfully.")
+        logFile.close()
 
     def selectingDatafromtableintocsv(self,Database):
 
         self.fileFromDb = 'TrainingFileFromDB/'
         self.fileName = 'InputFile.csv'
         log_file = open("TrainingLogs/ExportToCsv.txt", 'a+')
+        conn = self.dataBaseConnection(Database)
 
         try:
             conn = self.dataBaseConnection(Database)
-            allData = conn.Training.find({}, {"_id": 0, "Comments": 1, "Ratings": 1})
-
-            if allData.count == 0:
+            if conn.GoodRawData.count() == 0:
+                self.logger.log(log_file, 'No Record in GoodRawData Collection')
+                log_file.close()
                 return
 
             if not os.path.isdir(self.fileFromDb):
                 os.makedirs(self.fileFromDb)
 
-            headers = list(allData[0].keys())
-            csvFile = csv.DictWriter(open(self.fileFromDb + self.fileName, 'w', newline=''),delimiter=',', lineterminator='\r\n',quoting=csv.QUOTE_ALL, escapechar='\\')
-            csvFile.writerow(headers)
-            csvFile.writerows(allData)
+            data = list()
+            for row in conn.GoodRawData.find({}, {"_id": 0, "Comments": 1, "Ratings": 1}):
+                data.append({'Comments': row['Comments'], 'Ratings': row['Ratings']})
 
-            self.logger.log(log_file, "File exported successfully!!!")
+            dataframe = pd.DataFrame(data, columns=['Comments', 'Ratings'])
+            dataframe.to_csv(os.path.join(self.fileFromDb, self.fileName), index=None)
+
+            self.logger.log(log_file, 'CSV File Exported Successfully !!!')
+            self.logger.log(log_file,
+                'Successfully Executed selectingDatafromtableintocsv method of dbOperation class of dbOperation package')
             log_file.close()
 
         except Exception as e:
-            self.logger.log(log_file, "File exporting failed. Error : %s" %e)
+            self.logger.log(log_file, "File exporting failed. Error : %s" % e)
             log_file.close()
-

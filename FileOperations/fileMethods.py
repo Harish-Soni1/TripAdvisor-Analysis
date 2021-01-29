@@ -15,14 +15,25 @@ class FileOperations:
             "Entered int the saveModel if the FileOperations class")
 
         try:
-            path = os.path.join(self.modelDirectory, filename)
+            if filename == 'svm':
+                fullFilename = 'SupportVector'
+            elif filename == 'rf':
+                fullFilename = 'RandomForest'
+            elif filename == 'xg':
+                fullFilename = 'XGBoost'
+            elif filename == 'bnb':
+                fullFilename = 'BaggingGaussianNB'
+            else:
+                fullFilename = filename
+
+            path = os.path.join(self.modelDirectory, fullFilename)
             if os.path.isdir(path):
                 shutil.rmtree(self.modelDirectory)
                 os.mkdir(path)
             else:
                 os.mkdir(path)
 
-            with open(path + "/" + filename + ".sav", 'wb') as file:
+            with open(path + "/" + fullFilename + ".sav", 'wb') as file:
                 pickle.dump(model, file)
             
             self.logger_object.log(self.file_object,

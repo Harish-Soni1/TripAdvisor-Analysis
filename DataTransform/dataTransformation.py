@@ -17,8 +17,9 @@ class dataTransform:
                     onlyfiles = [f for f in listdir(self.goodDataPath)]
                     for file in onlyfiles:
                          csv = pandas.read_csv(self.goodDataPath+"/" + file)
-                         csv.fillna('NULL',inplace=True)
-                         csv['Wafer'] = csv['Wafer'].str[6:]
+                         csv.fillna('NULL', inplace=True)
+                         csv['Review'] = csv['Review'].str[6:]
+                         print(csv['Review'])
                          csv.to_csv(self.goodDataPath+ "/" + file, index=None, header=True)
                          self.logger.log(log_file," %s: File Transformed successfully!!" % file)
                else:

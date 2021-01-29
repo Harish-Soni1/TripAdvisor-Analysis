@@ -12,7 +12,7 @@ class RawDataValidation:
     def __init__(self, path):
         self.path = path
         self.schemaPath = 'schema_training.json'
-        self.logger = App_Logger()
+        self.logger = AppLogger()
 
     def valuesFromSchema(self):
         try:
@@ -25,7 +25,7 @@ class RawDataValidation:
             NumberOfColumn = dic['NumberOfColumn']
 
             file = open("TrainingLogs/valuesFromSchemaValidationLog.txt", "a+")
-            message ="LengthOfDateTimeStampInFile:: %s" %LengthOfDateTimeStampInFile +"\t " + "NumberofColumns:: %s" % NumberofColumn + "\n"
+            message ="LengthOfDateTimeStampInFile:: %s" %LengthOfDateTimeStampInFile +"\t " + "NumberofColumns:: %s" %NumberOfColumn + "\n"
             self.logger.log(file,message)
 
             file.close()
@@ -57,22 +57,23 @@ class RawDataValidation:
         try:
             path = os.path.join("TrainingRawfilesValidated/", "GoodRaw/")
             if not os.path.exists(path):
-                os.mkdir(path)
-            path = os.path.join("TrainingRawFilesValidated/","BadRaw/")
+                os.makedirs(path)
+            path = os.path.join("TrainingRawfilesValidated/","BadRaw/")
             if not os.path.exists(path):
-                os.mkdir(path)
+                os.makedirs(path)
 
         except OSError as ex:
             file = open("TrainingLogs/GeneralLog.txt", 'a+')
             self.logger.log(file,"Error while creating Directory %s:" % ex)
             file.close()
-            raise OSError
+            raise ex
+
     def deleteExistingGoodDataTrainingFolder(self):
         try:
-            path = "TrainingRawFilesValidated/"
+            path = "TrainingRawfilesValidated/"
             if os.path.exists(path + "GoodRaw/"):
                 shutil.rmtree(path + "GoodRaw/")
-                file = open("Training_Logs/GeneralLog.txt", 'a+')
+                file = open("TrainingLogs/GeneralLog.txt", 'a+')
                 self.logger.log(file,"GoodRaw directory deleted successfully!!!")
                 file.close()
 
@@ -84,15 +85,15 @@ class RawDataValidation:
 
     def deleteExistingBadDataTrainingFolder(self):
         try:
-            path = "TrainingRawFilesValidated/"
+            path = "TrainingRawfilesValidated/"
             if os.path.exists(path + "BadRaw/"):
                 shutil.rmtree(path + "BadRaw/")
-                file = open("Training_Logs/GeneralLog.txt", 'a+')
+                file = open("TrainingLogs/GeneralLog.txt", 'a+')
                 self.logger.log(file,"BadRaw directory deleted successfully!!!")
                 file.close()
 
         except OSError as s:
-            file = open("Training_Logs/GeneralLog.txt", 'a+')
+            file = open("TrainingLogs/GeneralLog.txt", 'a+')
             self.logger.log(file,"Error while Deleting Directory : %s" %s)
             file.close()
             raise OSError
@@ -104,16 +105,16 @@ class RawDataValidation:
         time = now.strftime("%H%M%S")
 
         try:
-            source = "TrainingRawFilesValidated/BadRaw/"
+            source = "TrainingRawfilesValidated/BadRaw/"
 
             if os.path.isdir(source):
                 path = "TrainingArchivedBadData"
                 if not os.path.exists(path):
-                    os.mkdir(path)
+                    os.makedirs(path)
                 
                 destPath = "TrainingArchivedBadData/BadData_" + str(date) + "_" + str(time)
                 if not os.path.exists(destPath):
-                    os.mkdir(destPath)
+                    os.makedirs(destPath)
                 
                 files = os.listdir(source)
                 for file in files:
@@ -122,7 +123,7 @@ class RawDataValidation:
 
                 file = open("TrainingLogs/GeneralLog.txt", 'a+')
                 self.logger.log(file,"Bad files moved to archive")
-                path = 'TrainingRawFilesValidated/'
+                path = 'TrainingRawfilesValidated/'
                 if os.path.isdir(path + 'Bad_Raw/'):
                     shutil.rmtree(path + 'Bad_Raw/')
                 self.logger.log(file,"Bad Raw Data Folder Deleted successfully!!")
@@ -140,55 +141,59 @@ class RawDataValidation:
         self.deleteExistingGoodDataTrainingFolder()
         self.createDirectoryForGoodBadRawData()
 
-        onlyfiles = [f for f in listdir(self.Batch_Directory)]
+        onlyfiles = [f for f in listdir(self.path)]
         try:
             file = open("TrainingLogs/nameValidationLog.txt", "a+")
             for filename in onlyfiles:
-                if re.match(regex, filename):
+                if (re.match(regex, filename)):
                     splitAtDot = re.split(".csv", filename)
+                    splitAtDot = re.split("_", splitAtDot[0])
                     if len(splitAtDot[1]) == LengthOfDateTimeStampInFile:
-                        shutil.copy("TrainingBatchFiles/" + filename, "TrainingRawFilesValidated/GoodRaw")
-                        self.logger.log(f,"Valid File name!! File moved to GoodRaw Folder :: %s" % filename)
+                        shutil.copy("TrainingBatchFiles/" + filename, "TrainingRawfilesValidated/GoodRaw")
+                        self.logger.log(file,"Valid File name!! File moved to GoodRaw Folder :: %s" % filename)
                     else:
-                        shutil.copy("TraininBatchFiles/" + filename, "TariningRawFilesValidated/BadRaw")
-                        self.logger.log(f,"Invalid File Name!! File moved to Bad Raw Folder :: %s" % filename)
+                        shutil.copy("TrainingBatchFiles/" + filename, "TrainingRawfilesValidated/BadRaw")
+                        self.logger.log(file,"Invalid File Name!! File moved to Bad Raw Folder :: %s" % filename)
                 else:
-                    shutil.copy("TraininBatchFiles/" + filename, "TariningRawFilesValidated/BadRaw")
-                    self.logger.log(f,"Invalid File Name!! File moved to Bad Raw Folder :: %s" % filename)
+                    shutil.copy("TrainingBatchFiles/" + filename, "TrainingRawfilesValidated/BadRaw")
+                    self.logger.log(file,"Invalid File Name!! File moved to Bad Raw Folder :: %s" % filename)
             
-            f.close()
+            file.close()
 
         except Exception as e:
-            f = open("Training_Logs/nameValidationLog.txt", 'a+')
+            f = open("TrainingLogs/nameValidationLog.txt", 'a+')
             self.logger.log(f, "Error occured while validating FileName %s" % e)
             f.close()
             raise e
 
     def validateColumnLength(self, NumberOfColumn):
         try:
-            file = open("TariningLogs/columnValidationLog.txt", "a+")
-            self.logger.log(f,"Column Length Validation Started!!")
-            for filename in listdir("TrainingRawFilesValidated/GoodRaw"):
-                csv = pd.read_csv("TrainingRawFilesValidated/GoodRaw/" + filename)
+            file = open("TrainingLogs/columnValidationLog.txt", "a+")
+            self.logger.log(file,"Column Length Validation Started!!")
+            for filename in listdir("TrainingRawfilesValidated/GoodRaw"):
+                csv = pd.read_csv("TrainingRawfilesValidated/GoodRaw/" + filename)
+                if csv.shape[1] > 2:
+                    csv = csv.drop(['Unnamed: 2'], axis=1)
                 if csv.shape[1] == NumberOfColumn:
                     pass
                 else:
-                    shutil.move("TrainingRawFilesValidated/GoodRaw/" + filename, "TariningRawFilesValidated/BadRaw")
-                    self.logger.log(f, "Invalid Column Length for the file!! File moved to Bad Raw Folder :: %s" % file)
-            self.logger.log(f, "Column Length Validation Completed!!")
+                    print(csv.columns)
+                    shutil.move("TrainingRawfilesValidated/GoodRaw/" + filename, "TrainingRawFilesValidated/BadRaw")
+                    self.logger.log(file, "Invalid Column Length for the file!! File moved to Bad Raw Folder :: %s" % file)
+            self.logger.log(file, "Column Length Validation Completed!!")
 
-        except OSError:
-            f = open("Training_Logs/columnValidationLog.txt", 'a+')
+        except OSError as ex:
+            f = open("TrainingLogs/columnValidationLog.txt", 'a+')
             self.logger.log(f, "Error Occured while moving the file :: %s" % OSError)
             f.close()
-            raise OSError
+            raise ex
 
         except Exception as e:
-            f = open("Training_Logs/columnValidationLog.txt", 'a+')
+            f = open("TrainingLogs/columnValidationLog.txt", 'a+')
             self.logger.log(f, "Error Occured:: %s" % e)
             f.close()
             raise e
 
-        f.close()
+        file.close()
 
     

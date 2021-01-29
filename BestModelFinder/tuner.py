@@ -1,8 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from xgboost import XGBClassifier
-from sklearn.metrics  import roc_auc_score,accuracy_score
-from sklearn.metrics import confusion_matrix, precision_score, recall_score
 from sklearn import model_selection
 from sklearn.ensemble import BaggingClassifier
 from sklearn.naive_bayes import MultinomialNB
@@ -28,7 +26,7 @@ class ModelFinder:
                 'n_estimators': [10,50,100,130], 'criterion': ['gini','entropy'],
                 'max_depth': range(2,5,1), 'max_features': ['auto', 'log2']
             }
-            self.grid = GridSearchCV(estimator = self.rfCl, param_grid = self.paramGrid, cv = 5, verbose = 3)
+            self.grid = GridSearchCV(estimator = self.rfCl, param_grid = self.paramaGrid, cv = 5, verbose = 3)
             self.grid.fit(trainX, trainY)
 
             self.criterion = self.grid.best_params_['criterion']
@@ -51,7 +49,7 @@ class ModelFinder:
                 'Exception occured in getBestParamsForRandomForest method of the ModelFinder class. Exception message:  ' + str(e))
             self.logger_object.log(self.file_object,
                 'Random Forest Parameter tuning  failed. Exited the getBestParamsForRandomForest method of the ModelFinder class')
-            raise Exception()
+            raise e
 
     def getBestParamsForXgBoost(self, trainX, trainY):
 
@@ -85,7 +83,7 @@ class ModelFinder:
                 'Exception occured in getBestParamsForXgBoost method of the ModelFinder class. Exception message:  ' + str(e))
             self.logger_object.log(self.file_object,
                 'XGBoost Parameter tuning  failed. Exited the getBestParamsForXgBoost method of the ModelFinder class')
-            raise Exception()
+            raise e
 
     def getBestBaggingClassifier(self, trainX, trainY):
         self.logger_object.log(self.file_object,
@@ -106,7 +104,7 @@ class ModelFinder:
                 'Exception occured in getBestBaggingClassifier method of the ModelFinder class. Exception message:  ' + str(e))
             self.logger_object.log(self.file_object,
                 'BaggingClassifier creation failed. Exited the getBestBaggingClassifier method of the ModelFinder class')
-            raise Exception()
+            raise e
 
     def bestOnvsRestClassifierModel(self, trainX, trainY):
 
@@ -127,11 +125,12 @@ class ModelFinder:
                 'Exception occured in bestOnevsRestClassifier method of the ModelFinder class. Exception message:  ' + str(e))
             self.logger_object.log(self.file_object,
                 'OnevsRstClassifier creation failed. Exited the bestOnevsRestClassifier method of the ModelFinder class')
-            raise Exception()
+            raise e
 
     def bestParaMeterForSupportVector(self, trainX, trainY):
-        self.logger_object(self.file_object,
-            'Entered in the bestParaMeterForSupportVector of the ModelFinder class')
+
+        self.logger_object.log(self.file_object,
+                               'Entered in the bestParaMeterForSupportVector of the ModelFinder class')
 
         try:
             self.paramaGridSVC = {
@@ -160,497 +159,5 @@ class ModelFinder:
                 'Exception occured in bestParaMeterForSupportVector method of the ModelFinder class. Exception message:  ' + str(e))
             self.logger_object.log(self.file_object,
                 'SupprtVectorMachine Parameter tuning failed. Exited the bestParaMeterForSupportVector method of the ModelFinder class')
-            raise Exception()
+            raise e
 
-    def getBestModel(self, trainX, trainY, testX, testY, modelName):
-
-        self.logger_object.log(self.file_object,
-            'Entered the getBestMode of the ModelFindef class')
-
-        try:
-            if len(modelName) > 3:
-                self.xgBoost = self.getBestParamsForXgBoost(trainX, trainY)
-                self.predictionXgBoost = self.xgBoost.predict(testX, testY)
-
-                self.randomForest = self.getBestParamsForRandomForest(trainX, trainY)
-                self.predictionRandomForest = self.randomForest(testX, testY)
-
-                self.baggingClassifier = self.getBestBaggingClassifier(trainX, trainY)
-                self.predictionBClassifier = self.baggingClassifier(testX, testY)
-
-                self.ovrModel = self.bestOnvsRestClassifierModel(trainX, trainY)
-                self.predictionOVR = self.ovrModel.predict(testX, testY)
-
-                self.svcModel = self.bestParaMeterForSupportVector(trainX, trainY)
-                self.predictionSVC = self.svcModel.predict(testX, testY)
-
-                if len(testY.unique()) == 1:
-                    self.xgBoostScore = accuracy_score(testY, self.predictionXgBoost)
-                    self.logger_object.log(self.file_object, 
-                        'Accuracy Score of xgBoost: ' + str(self.xgBoostScore))
-
-                    self.randomForestScore = accuracy_score(testY, self.predictionRandomForest)
-                    self.logger_object.log(self.file_object,
-                        'Accuracy Score of RandomForest: ' + str(self.randomForestScore))
-
-                    self.BClassifierScore = accuracy_score(testY, self.predictionBClassifier)
-                    self.logger_object.log(self.file_object,
-                        'Accuracy Score of BClassifier: ' + str(self.BClassifierScore))
-                    
-                    self.ovrScore = accuracy_score(testY, self.predictionOVR)
-                    self.logger_object.log(self.file_object,
-                        'Accuracy Score of ovrModel: ' + str(self.ovrScore))
-
-                    self.svcScore = accuracy_score(testY, self.predictionSVC)
-                    self.logger_object.log(self.file_object,
-                        'Accuracy Score of SVC: ' + str(self.svcScore))
-
-                else:
-                    self.xgBoostScore = roc_auc_score(testY, self.predictionXgBoost)
-                    self.logger_object.log(self.file_object,
-                        'RocAuc Score of xgBoost: ' + str(self.predictionXgBoost))
-
-                    self.randomForestScore = roc_auc_score(testY, self.predictionRandomForest)
-                    self.logger_object.log(self.file_object,
-                        'RocAuc Score of RandomForest: ' + str(self.randomForestScore))
-
-                    self.BClassifierScore = roc_auc_score(testY, self.predictionBClassifier)
-                    self.logger_object.log(self.file_object,
-                        'RocAuc Score of BClassifier: ' + str(self.BClassifierScore))
-
-                    self.ovrScore = roc_auc_score(testY, self.predictionOVR)
-                    self.logger_object.log(self.file_object,
-                        'RocAuc Score of ovrModel: ' + str(self.ovrScore))
-
-                    self.svcScore = roc_auc_score(testY, self.predictionSVC)
-                    self.logger_object.log(self.file_object,
-                        'RocAuc Score of SVC: ' + str(self.svcScore))
-                        
-                if (self.randomForestScore > self.xgBoostScore and
-                    self.randomForestScore > self.BClassifierScore and
-                    self.randomForestScore > self.ovrScore and
-                    self.randomForestScore > self.svcScore):
-                        return 'RandomForest', self.randomForest
-                elif (self.xgBoostScore > self.randomForestScore and
-                    self.xgBoostScore > self.BClassifierScore and
-                    self.xgBoostScore > self.ovrScore and
-                    self.xgBoostScore > self.svcScore):
-                        return 'XgBoost', self.xgBoost
-                elif (self.BClassifierScore > self.randomForestScore and
-                    self.BClassifierScore > self.xgBoostScore and
-                    self.BClassifierScore > self.ovrScore and
-                    self.BClassifierScore > self.svcScore):
-                        return 'BaggingClassifier', self.baggingClassifier
-                elif (self.ovrScore > self.randomForestScore and
-                    self.ovrScore > self.xgBoostScore and
-                    self.ovrScore > self.BClassifierScore and
-                    self.ovrScore > self.svcScore):
-                    return 'OnevsRestClassifier', self.ovrModel
-                else:
-                    return 'SupportVectorClassifier', self.svcModel
-            else:
-                if len(modelName) == 1:
-                    if modelName[0] == 'rf':
-                        self.randomForest = self.getBestParamsForRandomForest(trainX, trainY)
-                        self.predictionRandomForest = self.randomForest(testX, testY)
-                        return 'RandomForest', self.randomForest
-
-                    elif modelName[0] == 'xgb':
-                        self.xgBoost = self.getBestParamsForXgBoost(trainX, trainY)
-                        self.predictionXgBoost = self.xgBoost.predict(testX, testY)
-                        return 'XGBoost', self.xgBoost
-
-                    elif modelName[0] == 'svm':
-                        self.svcModel = self.bestParaMeterForSupportVector(trainX, trainY)
-                        self.predictionSVC = self.svcModel.predict(testX, testY)
-                        return 'SupoortVectorClassifier', self.svcModel
-
-                    else:
-                        self.baggingClassifier = self.getBestBaggingClassifier(trainX, trainY)
-                        self.predictionBClassifier = self.baggingClassifier(testX, testY)
-                        return 'BaggingClassifier', self.baggingClassifier
-
-                elif len(modelName) == 2:
-                    if (modelName[0] == 'svm' and modelName[1] == 'rf'):
-                        self.svcModel = self.bestParaMeterForSupportVector(trainX, trainY)
-                        self.predictionSVC = self.svcModel.predict(testX, testY)
-
-                        self.randomForest = self.getBestParamsForRandomForest(trainX, trainY)
-                        self.predictionRandomForest = self.randomForest(testX, testY)
-
-                        if len(testY.unique()) == 1:
-                            self.svcScore = accuracy_score(testY, self.predictionSVC)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.svcScore))
-
-                            self.randomForestScore = accuracy_score(testY, self.predictionRandomForest)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.randomForestScore))
-                        
-                        else:
-                            self.svcScore = roc_auc_score(testY, self.predictionSVC)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.svcScore))
-
-                            self.randomForestScore = roc_auc_score(testY, self.predictionRandomForest)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.randomForestScore))
-
-                        if self.svcScore > self.randomForestScore:
-                            return 'SupportVectorClassifier', self.svcModel
-
-                        else:
-                            return 'RandomForest', self.randomForest
-
-                    elif (modelName[0] == 'svm' and modelName[1] == 'xgb'):
-                        self.svcModel = self.bestParaMeterForSupportVector(trainX, trainY)
-                        self.predictionSVC = self.svcModel.predict(testX, testY)
-
-                        self.xgBoost = self.getBestParamsForXgBoost(trainX, trainY)
-                        self.predictionXgBoost = self.xgBoost.predict(testX, testY)
-
-                        if len(testY.unique()) == 1:
-                            self.svcScore = accuracy_score(testY, self.predictionSVC)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.svcScore))
-
-                            self.xgBoostScore = accuracy_score(testY, self.predictionXgBoost)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.xgBoostScore))
-                        
-                        else:
-                            self.svcScore = roc_auc_score(testY, self.predictionSVC)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.svcScore))
-
-                            self.xgBoostScore = roc_auc_score(testY, self.predictionXgBoost)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.xgBoostScore))
-
-                        if self.svcScore > self.xgBoostScore:
-                            return 'SupportVectorClassifier', self.svcModel
-
-                        else:
-                            return 'XGBoost', self.xgBoost
-
-                    elif (modelName[0] == 'svm' and modelName[1] == 'bnb'):
-                        self.svcModel = self.bestParaMeterForSupportVector(trainX, trainY)
-                        self.predictionSVC = self.svcModel.predict(testX, testY)
-
-                        self.baggingClassifier = self.getBestBaggingClassifier(trainX, trainY)
-                        self.predictionBClassifier = self.baggingClassifier(testX, testY)
-
-                        if len(testY.unique()) == 1:
-                            self.svcScore = accuracy_score(testY, self.predictionSVC)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.svcScore))
-
-                            self.BClassifierScore = accuracy_score(testY, self.predictionBClassifier)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.BClassifierScore))
-                        
-                        else:
-                            self.svcScore = roc_auc_score(testY, self.predictionSVC)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.svcScore))
-
-                            self.BClassifierScore = roc_auc_score(testY, self.predictionBClassifier)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.BClassifierScore))
-
-                        if self.svcScore > self.BClassifierScore:
-                            return 'SupportVectorClassifier', self.svcModel
-
-                        else:
-                            return 'BaggingClassifier', self.baggingClassifier
-
-                    elif (modelName[0] == 'rf' and modelName[1] == 'xgb'):
-                        self.randomForest = self.getBestParamsForRandomForest(trainX, trainY)
-                        self.predictionRandomForest = self.randomForest(testX, testY)
-
-                        self.xgBoost = self.getBestParamsForXgBoost(trainX, trainY)
-                        self.predictionXgBoost = self.xgBoost.predict(testX, testY)
-
-                        if len(testY.unique()) == 1:
-                            self.RandomForestScore = accuracy_score(testY, self.predictionRandomForest)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.RandomForestScore))
-
-                            self.xgBoostScore = accuracy_score(testY, self.predictionXgBoost)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.xgBoostScore))
-                        
-                        else:
-                            self.RandomForestScore = roc_auc_score(testY, self.predictionRandomForest)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.RandomForestScore))
-
-                            self.xgBoostScore = roc_auc_score(testY, self.predictionXgBoost)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.xgBoostScore))
-
-                        if self.RandomForestScore > self.xgBoostScore:
-                            return 'RandomForest', self.randomForest
-
-                        else:
-                            return 'XGBoost', self.xgBoost
-
-                    elif (modelName[0] == 'rf' and modelName[1] == 'bnb'):
-                        self.randomForest = self.getBestParamsForRandomForest(trainX, trainY)
-                        self.predictionRandomForest = self.randomForest(testX, testY)
-
-                        self.baggingClassifier = self.getBestBaggingClassifier(trainX, trainY)
-                        self.predictionBClassifier = self.baggingClassifier(testX, testY)
-
-                        if len(testY.unique()) == 1:
-                            self.randomForestScore = accuracy_score(testY, self.predictionRandomForest)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.randomForestScore))
-
-                            self.BClassifierScore = accuracy_score(testY, self.predictionBClassifier)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.BClassifierScore))
-                        
-                        else:
-                            self.randomForestScore = roc_auc_score(testY, self.predictionRandomForest)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.randomForestScore))
-
-                            self.BClassifierScore = roc_auc_score(testY, self.predictionBClassifier)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.BClassifierScore))
-
-                        if self.randomForestScore > self.BClassifierScore:
-                            return 'RandomForest', self.randomForest
-
-                        else:
-                            return 'BaggingClassifier', self.baggingClassifier
-
-                    elif modelName[0] == 'xgb':
-                        self.xgBoost = self.getBestParamsForXgBoost(trainX, trainY)
-                        self.predictionXgBoost = self.xgBoost.predict(testX, testY)
-
-                        self.baggingClassifier = self.getBestBaggingClassifier(trainX, trainY)
-                        self.predictionBClassifier = self.baggingClassifier(testX, testY)
-
-                        if len(testY.unique()) == 1:
-                            self.xgBoostScore = accuracy_score(testY, self.predictionXgBoost)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.xgBoostScore))
-
-                            self.BClassifierScore = accuracy_score(testY, self.predictionBClassifier)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.BClassifierScore))
-                        
-                        else:
-                            self.xgBoostScore = roc_auc_score(testY, self.predictionXgBoost)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.xgBoostScore))
-
-                            self.BClassifierScore = roc_auc_score(testY, self.predictionBClassifier)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.BClassifierScore))
-
-                        if self.xgBoostScore > self.BClassifierScore:
-                            return 'XGBoost', self.xgBoost
-
-                        else:
-                            return 'BaggingClassifier', self.baggingClassifier
-
-                elif len(modelName) == 3:
-                    if modelName[0] == 'svm':
-                        if (modelName[1] == 'rf' and modelName[2] == 'xgb'):
-                            self.svcModel = self.bestParaMeterForSupportVector(trainX, trainY)
-                            self.predictionSVC = self.svcModel.predict(testX, testY)
-
-                            self.randomForest = self.getBestParamsForRandomForest(trainX, trainY)
-                            self.predictionRandomForest = self.randomForest(testX, testY)
-
-                            self.xgBoost = self.getBestParamsForXgBoost(trainX, trainY)
-                            self.predictionXgBoost = self.xgBoost.predict(testX, testY)
-
-                            if len(testY.unique()) == 1:
-                                self.svcScore = accuracy_score(testY, self.predictionSVC)
-                                self.logger_object.log(self.file_object,
-                                    'Accuracy Score of SVC: ' + str(self.svcScore))
-
-                                self.randomForestScore = accuracy_score(testY, self.predictionRandomForest)
-                                self.logger_object.log(self.file_object,
-                                    'Accuracy Score of SVC: ' + str(self.randomForestScore))
-
-                                self.xgBoostScore = accuracy_score(testY, self.predictionXgBoost)
-                                self.logger_object.log(self.file_object,
-                                    'Accuracy Score of SVC: ' + str(self.xgBoostScore))
-                            
-                            else:
-                                self.svcScore = roc_auc_score(testY, self.predictionSVC)
-                                self.logger_object.log(self.file_object,
-                                    'RocAuc Score of SVC: ' + str(self.svcScore))
-
-                                self.randomForestScore = roc_auc_score(testY, self.predictionRandomForest)
-                                self.logger_object.log(self.file_object,
-                                    'RocAuc Score of SVC: ' + str(self.randomForestScore))
-
-                                self.xgBoostScore = roc_auc_score(testY, self.predictionXgBoost)
-                                self.logger_object.log(self.file_object,
-                                    'RocAuc Score of SVC: ' + str(self.xgBoostScore))
-
-                            if (self.svcScore > self.randomForestScore and
-                                self.svcScore > self.xgBoostScore):
-                                return 'SupportVectorClassifier', self.svcModel
-
-                            elif (self.randomForestScore > self.svcScore and
-                                self.randomForestScore > self.xgBoostScore):
-                                return 'RandomForest', self.randomForest
-                            
-                            else:
-                                return 'XGBoost', self.xgBoost
-
-                        elif (modelName[1] == 'rf' and modelName[2] == 'bnb'):
-                            self.svcModel = self.bestParaMeterForSupportVector(trainX, trainY)
-                            self.predictionSVC = self.svcModel.predict(testX, testY)
-
-                            self.randomForest = self.getBestParamsForRandomForest(trainX, trainY)
-                            self.predictionRandomForest = self.randomForest(testX, testY)
-
-                            self.baggingClassifier = self.getBestBaggingClassifier(trainX, trainY)
-                            self.predictionBClassifier = self.baggingClassifier(testX, testY)
-
-                            if len(testY.unique()) == 1:
-                                self.svcScore = accuracy_score(testY, self.predictionSVC)
-                                self.logger_object.log(self.file_object,
-                                    'Accuracy Score of SVC: ' + str(self.svcScore))
-
-                                self.randomForestScore = accuracy_score(testY, self.predictionRandomForest)
-                                self.logger_object.log(self.file_object,
-                                    'Accuracy Score of SVC: ' + str(self.randomForestScore))
-
-                                self.BClassifierScore = accuracy_score(testY, self.predictionBClassifier)
-                                self.logger_object.log(self.file_object,
-                                    'Accuracy Score of SVC: ' + str(self.BClassifierScore))
-                            
-                            else:
-                                self.svcScore = roc_auc_score(testY, self.predictionSVC)
-                                self.logger_object.log(self.file_object,
-                                    'RocAuc Score of SVC: ' + str(self.svcScore))
-
-                                self.randomForestScore = roc_auc_score(testY, self.predictionRandomForest)
-                                self.logger_object.log(self.file_object,
-                                    'RocAuc Score of SVC: ' + str(self.randomForestScore))
-
-                                self.BClassifierScore = roc_auc_score(testY, self.predictionBClassifier)
-                                self.logger_object.log(self.file_object,
-                                    'RocAuc Score of SVC: ' + str(self.BClassifierScore))
-
-                            if (self.svcScore > self.randomForestScore and
-                                self.svcScore > self.BClassifierScore):
-                                return 'SupportVectorClassifier', self.svcModel
-
-                            elif (self.randomForestScore > self.svcScore and
-                                self.randomForestScore > self.BClassifierScore):
-                                return 'RandomForest', self.randomForest
-                            
-                            else:
-                                return 'BaggingClassifier', self.baggingClassifier
-
-                        elif (modelName[1] == 'xgb'):
-                            self.svcModel = self.bestParaMeterForSupportVector(trainX, trainY)
-                            self.predictionSVC = self.svcModel.predict(testX, testY)
-
-                            self.xgBoost = self.getBestParamsForXgBoost(trainX, trainY)
-                            self.predictionXgBoost = self.xgBoost.predict(testX, testY)
-
-                            self.baggingClassifier = self.getBestBaggingClassifier(trainX, trainY)
-                            self.predictionBClassifier = self.baggingClassifier(testX, testY)
-
-                            if len(testY.unique()) == 1:
-                                self.svcScore = accuracy_score(testY, self.predictionSVC)
-                                self.logger_object.log(self.file_object,
-                                    'Accuracy Score of SVC: ' + str(self.svcScore))
-
-                                self.xgBoostScore = accuracy_score(testY, self.predictionXgBoost)
-                                self.logger_object.log(self.file_object,
-                                    'Accuracy Score of SVC: ' + str(self.xgBoostScore))
-
-                                self.BClassifierScore = accuracy_score(testY, self.predictionBClassifier)
-                                self.logger_object.log(self.file_object,
-                                    'Accuracy Score of SVC: ' + str(self.BClassifierScore))
-                            
-                            else:
-                                self.svcScore = roc_auc_score(testY, self.predictionSVC)
-                                self.logger_object.log(self.file_object,
-                                    'RocAuc Score of SVC: ' + str(self.svcScore))
-
-                                self.xgBoostScore = roc_auc_score(testY, self.predictionXgBoost)
-                                self.logger_object.log(self.file_object,
-                                    'RocAuc Score of SVC: ' + str(self.xgBoostScore))
-
-                                self.BClassifierScore = roc_auc_score(testY, self.predictionBClassifier)
-                                self.logger_object.log(self.file_object,
-                                    'RocAuc Score of SVC: ' + str(self.BClassifierScore))
-
-                            if (self.svcScore > self.xgBoostScore and
-                                self.svcScore > self.BClassifierScore):
-                                return 'SupportVectorClassifier', self.svcModel
-
-                            elif (self.xgBoostScore > self.svcScore and
-                                self.xgBoostScore > self.BClassifierScore):
-                                return 'XGBoost', self.xgBoost
-                            
-                            else:
-                                return 'BaggingClassifier', self.baggingClassifier
-                
-                    else:
-                        self.randomForest = self.getBestParamsForRandomForest(trainX, trainY)
-                        self.predictionRandomForest = self.randomForest(testX, testY)
-
-                        self.xgBoost = self.getBestParamsForXgBoost(trainX, trainY)
-                        self.predictionXgBoost = self.xgBoost.predict(testX, testY)
-
-                        self.baggingClassifier = self.getBestBaggingClassifier(trainX, trainY)
-                        self.predictionBClassifier = self.baggingClassifier(testX, testY)
-
-                        if len(testY.unique()) == 1:
-                            self.randomForestScore = accuracy_score(testY, self.predictionRandomForest)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.randomForestScore))
-
-                            self.xgBoostScore = accuracy_score(testY, self.predictionXgBoost)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.xgBoostScore))
-
-                            self.BClassifierScore = accuracy_score(testY, self.predictionBClassifier)
-                            self.logger_object.log(self.file_object,
-                                'Accuracy Score of SVC: ' + str(self.BClassifierScore))
-                            
-                        else:
-                            self.randomForestScore = roc_auc_score(testY, self.predictionRandomForest)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.randomForestScore))
-
-                            self.xgBoostScore = roc_auc_score(testY, self.predictionXgBoost)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.xgBoostScore))
-
-                            self.BClassifierScore = roc_auc_score(testY, self.predictionBClassifier)
-                            self.logger_object.log(self.file_object,
-                                'RocAuc Score of SVC: ' + str(self.BClassifierScore))
-
-                        if (self.randomForestScore > self.xgBoostScore and
-                            self.randomForestScore > self.BClassifierScore):
-                            return 'RandomForest', self.randomForest
-
-                        elif (self.xgBoostScore > self.randomForestScore and
-                            self.xgBoostScore > self.BClassifierScore):
-                            return 'XGBoost', self.xgBoost
-                            
-                        else:
-                            return 'BaggingClassifier', self.baggingClassifier
-
-
-        except Exception as e:
-            self.logger_object.log(self.file_object,
-                'Exception occured in get_best_model method of the ModelFinder class. Exception message:  ' + str(e))
-            self.logger_object.log(self.file_object,
-                'Model Selection Failed. Exited the get_best_model method of the ModelFinder class')
-            raise Exception()

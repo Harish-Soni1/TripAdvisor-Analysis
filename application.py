@@ -3,7 +3,7 @@ from flask import Flask,render_template,request,Response,send_file
 import os
 import shutil
 from flask_cors import cross_origin,CORS
-from trainingModel import TrainModel
+from trainingModel import TrainingModel
 from trainValidationInsertion import TrainValidation
 import flask_monitoringdashboard as dashboard
 import json
@@ -31,12 +31,11 @@ def trainModelRoute():
                     if request.form['model_list[]'] is not None and request.form['sampler'] is not None:
                         model_list = request.form.getlist('model_list[]')
                         sampling = request.form['sampler']
-                        user_choice_dict = {'model':model_list,'sampling':sampling}
-                        print(user_choice_dict)
-                        trainObj = TrainValidation("TrainngfileFromDB/inputFile.csv")
+
+                        trainObj = TrainValidation("TrainingBatchFiles/")
                         trainObj.trainValidation()
-                        trainModelObj = TrainModel()
-                        trainModelObj.trainingOfModel()
+                        trainModelObj = TrainingModel(model_list, sampling)
+                        trainModelObj.trainModel()
             except ValueError:
                 print(str(ValueError))
                 return Response('Error Occured! %s' % str(ValueError))
