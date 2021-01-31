@@ -36,6 +36,7 @@ def trainModelRoute():
                         trainObj.trainValidation()
                         trainModelObj = TrainingModel(model_list, sampling)
                         trainModelObj.trainModel()
+                return Response('Training Completed Successfully !!!!')
             except ValueError:
                 print(str(ValueError))
                 return Response('Error Occured! %s' % str(ValueError))
@@ -44,7 +45,7 @@ def trainModelRoute():
                 return Response('Error Occured! %s' % str(KeyError))
         else:
             print('None Request Method Passed')
-        return Response(None)
+        return Response("Model Creation Succesfull")
     except Exception as e:
         print(e)
         raise e

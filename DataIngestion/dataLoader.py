@@ -14,8 +14,11 @@ class DataGetter:
 
         try:
             self.data = pd.read_csv(self.predictionFile)
-            self.logger_object.log(self.file_object, 
+
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Data Load Succesfully. Exited to getData of the DataGetter class')
+            file.close()
 
             return self.data
 

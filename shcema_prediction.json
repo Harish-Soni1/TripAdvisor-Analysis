@@ -1,0 +1,8 @@
+{
+    "SampleFileName": "Review_1611238440.csv",
+    "LengthOFDateStampInFile": 10,
+    "NumberOfColumn": 1,
+    "ColName" : {
+        "Comments" : "varchar"
+    }
+}

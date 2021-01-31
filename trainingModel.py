@@ -69,14 +69,14 @@ class TrainingModel:
             
             modelEvaluate = modelEvaluation.ModelEvaluation(self.trainedModelsDict, x_test, y_test, self.file_object, self.logger_object)
             self.modelEvaluationReportDict =  modelEvaluate.generateModelsEvaluationReportDict(self.trainedModelsDict)
-            self.orderedModelEvaluationReportDict = sorted(self.modelEvaluationReportDict.items(),key=lambda x:x[1]['f1_score'],reverse=True)
+            self.orderedModelEvaluationReportDict = sorted(self.modelEvaluationReportDict.items(),key=lambda x:x[1]['F1Score'],reverse=True)
 
             for model in self.orderedModelEvaluationReportDict:
                 model_to_save = model
                 break
 
             fileOperation = fileMethods.FileOperations(self.file_object,self.logger_object)
-            isModelSaved = fileOperation.saveModel(self.trainedModelsDict[model], model_to_save)
+            isModelSaved = fileOperation.saveModel(self.trainedModelsDict[model_to_save[0]], model_to_save[0])
             fileOperation.saveModel(vect, "Vectorizer")
             fileOperation.saveModel(tfidf, "TFIDFTransformer")
 

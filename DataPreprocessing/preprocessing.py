@@ -30,8 +30,10 @@ class Preprocessor:
         try:
             if self.column in self.data.columns:
                 self.usefullData = self.data.drop(labels = self.column, axis = 1)
-                self.logger_object.log(self.file_object, 
-                    'Column Removal Succesfull. Exited to the removeColumn of the Preprocessor class')    
+                file = open('TrainingLogs/GeneralLog.txt', 'a+')
+                self.logger_object.log(file,
+                    'Column Removal Succesfull. Exited to the removeColumn of the Preprocessor class')
+                file.close()
             
             return self.usefullData
         except Exception as e:
@@ -48,9 +50,11 @@ class Preprocessor:
         self.data = data
         try:
             self.data["Comments"] = self.data["Comments"].apply(lambda x: cleanReviews(x))
-            
-            self.logger_object.log(self.file_object,
+
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Review Cleaning Seuccesfull. Exited to the cleanReview of the Preprocessor class')
+            file.close()
 
             return self.data
         except Exception as e:
@@ -72,15 +76,18 @@ class Preprocessor:
                 "hasn't", "haven", "haven't", "isn", "isn't", "mightn", "mightn't", 
                 "mustn", "mustn't", "needn", "needn't", "shan", "shan't", "shouldn", 
                 "shouldn't", "won", "wasn", "wasn't", "weren", "weren't", "won't", 
-                "wouldn", "wouldn't", "should", "should've", "no", "nor", "not", "very"]
+                "wouldn", "wouldn't", "should", "should've", "no", "nor", "not", "very", "hotel", "singapore"]
             
             for word in self.stopWords:
                 if word in self.wanted:
                     self.stopWords.remove(word)
             
             self.data["Comments"] = self.data["Comments"].apply(lambda x: " ".join(x for x in x.split() if x not in self.stopWords))
-            self.logger_object.log(self.file_object,
+
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Remove StopWords Succesfull. Exited to the removeStopWords of the Preprocessor class')
+            file.close()
 
             return self.data
 
@@ -104,8 +111,10 @@ class Preprocessor:
             self.data["Comments"] = self.data["Comments"].apply(lambda x: lemmatizeText(x))
             self.data["Comments"] = self.data["Comments"].apply(lambda x: stringifyData(x))
 
-            self.logger_object.log(self.file_object,
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Lemmatization Succesfull. Exited to the Lemmetizer of the Preprocessor class')
+            file.close()
 
             return self.data
         except Exception as e:
@@ -122,8 +131,11 @@ class Preprocessor:
         self.rate = rate
         try:
             self.polarizeRate = self.rate.apply(lambda x: 2 if x > 3 else(1 if x==3 else 0))
-            self.logger_object.log(self.file_object,
+
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Polarizing Succesfull. Exited to the prolarizeRating of the Preprocessor class')
+            file.close()
 
             return self.polarizeRate
         except Exception as e:
@@ -141,8 +153,10 @@ class Preprocessor:
             self.X = data.drop(labels = labelCoulmnName, axis = 1)
             self.Y = data[labelCoulmnName]
 
-            self.logger_object.log(self.file_object, 
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Separation Succesfull. Exited to the separateLabelFeatures of the Preprocessor class')
+            file.close()
 
             return self.X, self.Y
         except Exception as e:
@@ -171,8 +185,10 @@ class Preprocessor:
                 dataFrameWithNull['missingValueCount'] = np.asarray(data.isna().sum())
                 dataFrameWithNull.to_csv('preprocessing_data/null_values.csv')
 
-                self.logger_object.log(self.file_object, 
+                file = open('TrainingLogs/GeneralLog.txt', 'a+')
+                self.logger_object.log(file,
                     'Finding Missing Succesfull. Exited to the isNullPresent of the Preprocessor class')
+                file.close()
                 
                 return self.isNull
             else:
@@ -202,8 +218,11 @@ class Preprocessor:
             self.trainX = self.trainX.toarray()
             self.testX = self.testX.toarray()
 
-            self.logger_object.log(self.file_object,
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Vectorize Text Succesfull. Exited to the vectorizeText of the Preprocessor class')
+            file.close()
+
             return self.trainX, self.testX, vect, tfidf
 
         except Exception as e:
@@ -220,22 +239,24 @@ class Preprocessor:
         self.trainY = trainY
         
         try:
-            self.logger_object.log(self.file_object,
-                'trainX shape before over-sampling: ' + str(sum(self.trainY == 'Positive')))
-            self.logger_object.log(self.file_object,
-                'trainX shape before over-sampling: ' + str(sum(self.trainY == 'Negative')))
-            self.logger_object.log(self.file_object,
-                'trainX shape before over-sampling: ' + str(sum(self.trainY == 'Neutral')))
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
+                'trainX shape before over-sampling: ' + str(sum(self.trainY == 2)))
+            self.logger_object.log(file,
+                'trainX shape before over-sampling: ' + str(sum(self.trainY == 0)))
+            self.logger_object.log(file,
+                'trainX shape before over-sampling: ' + str(sum(self.trainY == 1)))
 
             self.overSample = SMOTE(random_state = 42, sampling_strategy = "auto")
             self.trainX, self.trainY = self.overSample.fit_sample(self.trainX, self.trainY)
 
-            self.logger_object.log(self.file_object,
-                'trainX shape after over-sampling: ' + str(sum(self.trainY == 'Positive')))
-            self.logger_object.log(self.file_object,
-                'trainX shape after over-sampling: ' + str(sum(self.trainY == 'Negative')))
-            self.logger_object.log(self.file_object,
-                'trainX shape after over-sampling: ' + str(sum(self.trainY == 'Neutral')))
+            self.logger_object.log(file,
+                'trainX shape after over-sampling: ' + str(sum(self.trainY == 2)))
+            self.logger_object.log(file,
+                'trainX shape after over-sampling: ' + str(sum(self.trainY == 0)))
+            self.logger_object.log(file,
+                'trainX shape after over-sampling: ' + str(sum(self.trainY == 1)))
+            file.close()
 
             return self.trainX, self.trainY
         
@@ -252,22 +273,24 @@ class Preprocessor:
         self.trainX = trainX
         self.trainY = trainY
         try:
-            self.logger_object.log(self.file_object,
-                'trainX shape before under-sampling: ' + str(sum(self.trainY == 'Positive')))
-            self.logger_object.log(self.file_object,
-                'trainX shape before under-sampling: ' + str(sum(self.trainY == 'Negative')))
-            self.logger_object.log(self.file_object,
-                'trainX shape before under-sampling: ' + str(sum(self.trainY == 'Neutral')))
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
+                'trainX shape before under-sampling: ' + str(sum(self.trainY == 2)))
+            self.logger_object.log(file,
+                'trainX shape before under-sampling: ' + str(sum(self.trainY == 0)))
+            self.logger_object.log(file,
+                'trainX shape before under-sampling: ' + str(sum(self.trainY == 1)))
 
             self.underSample = NearMiss(version = 1)
             self.trainX, self.trainY = self.underSample.fit_sample(self.trainX, self.trainY)
 
-            self.logger_object.log(self.file_object,
-                'trainX shape after under-sampling: ' + str(sum(self.trainY == 'Positive')))
-            self.logger_object.log(self.file_object,
-                'trainX shape after under-sampling: ' + str(sum(self.trainY == 'Negative')))
-            self.logger_object.log(self.file_object,
-                'trainX shape after under-sampling: ' + str(sum(self.trainY == 'Neutral')))
+            self.logger_object.log(file,
+                'trainX shape after under-sampling: ' + str(sum(self.trainY == 2)))
+            self.logger_object.log(file,
+                'trainX shape after under-sampling: ' + str(sum(self.trainY == 0)))
+            self.logger_object.log(file,
+                'trainX shape after under-sampling: ' + str(sum(self.trainY == 1)))
+            file.close()
 
             return self.trainX, self.trainY
             

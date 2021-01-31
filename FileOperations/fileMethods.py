@@ -29,15 +29,17 @@ class FileOperations:
             path = os.path.join(self.modelDirectory, fullFilename)
             if os.path.isdir(path):
                 shutil.rmtree(self.modelDirectory)
-                os.mkdir(path)
+                os.makedirs(path)
             else:
-                os.mkdir(path)
+                os.makedirs(path)
 
             with open(path + "/" + fullFilename + ".sav", 'wb') as file:
                 pickle.dump(model, file)
-            
-            self.logger_object.log(self.file_object,
+
+            file = open("TrainingLogs/GeneralLogs.txt", 'a+')
+            self.logger_object.log(file,
                 'Model File '+filename+' saved. Exited the save_model method of the Model_Finder class')
+            file.close()
             
             return 'success'
 

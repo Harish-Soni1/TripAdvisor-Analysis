@@ -38,9 +38,12 @@ class ModelFinder:
                 max_depth = self.max_depth, max_features = self.max_features)
             
             self.rfCl.fit(trainX, trainY)
-            self.logger_object.log(self.file_object,
+
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Best Paramas for RandomForest: ' + str(self.grid.best_params_) +'. Exited the getBestParamsForRandomForest of the ModelFinder class'
             )
+            file.close()
 
             return self.rfCl
 
@@ -56,9 +59,9 @@ class ModelFinder:
         self.logger_object.log(self.file_object, 'Entered in the getBestParamsForXgBoost of the ModelFinder class')
         try:
             self.paramGridXgBoost = {
-                'learning_rate': [0.5, 0.1, 0.01, 0.001],
-                'max_depth': [3, 5, 10, 20],
-                'n_estimators': [10, 50, 100, 200]
+                'learning_rate': [0.01, 0.001],
+                'max_depth': [10, 20],
+                'n_estimators': [100, 200]
             }
 
             self.grid = GridSearchCV(estimator = XGBClassifier(objective = 'multi:softmax'), param_grid = self.paramGridXgBoost,
@@ -73,9 +76,10 @@ class ModelFinder:
                 max_depth = self.max_depth, objective = 'multi:softmax')
             self.xgb.fit(trainX, trainY)
 
-            self.logger_object.log(self.file_object,
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Best params for XgBoost: ' + str(self.grid.best_params_) + '. Exited from the getBestParamsForXgBoost of the ModelFinder class')
-            
+            file.close()
             return self.xgb
             
         except Exception as e:
@@ -95,8 +99,10 @@ class ModelFinder:
             self.model = BaggingClassifier(base_estimator = self.mnb, n_estimators = 10)
             self.model.fit(trainX, trainY)
 
-            self.logger_object.log(self.file_object,
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Exited from getBestBaggingClassifier of the ModelFinder class')
+            file.close()
 
             return self.model
         except Exception as e:
@@ -116,8 +122,10 @@ class ModelFinder:
             self.ovrModel = OneVsRestClassifier(self.xgBoost)
             self.ovrModel.fit(trainX, trainY)
 
-            self.logger_object.log(self.file_object,
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Exited from bestOnevsRestClassifier of the ModelFinder class')
+            file.close()
 
             return self.ovrModel
         except Exception as e:
@@ -149,9 +157,11 @@ class ModelFinder:
             self.svc = SVC( C = self.C, gamma = self.gamma, kernel = self.kernel)
             self.svc.fit(trainX, trainY)
 
-            self.logger_object.log(self.file_object,
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file,
                 'Best params for SupportVector: ' + str(self.grid.best_params_) + '. Exited from the bestParaMeterForSupportVector of the ModelFinder class')
-            
+            file.close()
+
             return self.svc
 
         except Exception as e:
