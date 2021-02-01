@@ -18,8 +18,7 @@ class dataTransform:
                     for file in onlyfiles:
                          csv = pandas.read_csv(self.goodDataPath+"/" + file)
                          csv.fillna('NULL', inplace=True)
-                         csv['Review'] = csv['Review'].str[6:]
-                         print(csv['Review'])
+                         csv['Comments'] = csv['Comments'].str[6:]
                          csv.to_csv(self.goodDataPath+ "/" + file, index=None, header=True)
                          self.logger.log(log_file," %s: File Transformed successfully!!" % file)
                else:

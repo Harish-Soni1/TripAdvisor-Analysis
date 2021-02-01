@@ -7,7 +7,7 @@ from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import NearMiss
 nltk.download('stopwords')
 nltk.download('wordnet')
-from nltk.tokenize import word_tokenize, RegexpTokenizer
+from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords, wordnet
 import numpy as np
 import re
