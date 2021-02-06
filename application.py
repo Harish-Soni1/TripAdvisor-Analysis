@@ -6,8 +6,8 @@ from flask_cors import cross_origin,CORS
 from trainingModel import TrainingModel
 from trainValidationInsertion import TrainValidation
 import flask_monitoringdashboard as dashboard
-import json
-import pandas as pd
+from predictionValidationInsertion import PredictionValidation
+from predictionFromModel import PredictionFromModel
 
 os.putenv('LANG', 'en_US.UTF-8')
 os.putenv('LC_ALL', 'en_US.UTF-8')
@@ -31,6 +31,16 @@ def trainModelRoute():
                     if request.form['model_list[]'] is not None and request.form['sampler'] is not None:
                         model_list = request.form.getlist('model_list[]')
                         sampling = request.form['sampler']
+
+                        for file in os.listdir("TrainingLogs"):
+                            filePath = os.path.join("TrainingLogs/", file)
+                            try:
+                                if os.path.isfile(filePath) or os.path.islink(filePath):
+                                    os.unlink(filePath)
+                                elif os.path.isdir(filePath):
+                                    shutil.rmtree(filePath)
+                            except Exception as e:
+                                raise  e
 
                         trainObj = TrainValidation("TrainingBatchFiles/")
                         trainObj.trainValidation()
@@ -56,13 +66,16 @@ def trainModelRoute():
 def predictBatchRoute():
     try:
         if request.method == 'POST':
-            #print(request.files)
             try:
                 if 'batchfile[]' in request.files:
                     batchFiles = request.files.getlist("batchfile[]")
-                    #print(batchFiles)
                     for file in batchFiles:
-                        file.save('Prediction_Batch_Files/' + file.filename)
+                        file.save('PredictionBatchFiles/' + file.filename)
+                        predictionValidation = PredictionValidation('PredictionBatchFiles', file.filename)
+                        predictionValidation.predictionValidation()
+                    for file in os.listdir("PredictionBatchFiles/"):
+                        prediction = PredictionFromModel()
+                        prediction.predictData(file)
             except Exception as e:
                 print(e)
                 raise e

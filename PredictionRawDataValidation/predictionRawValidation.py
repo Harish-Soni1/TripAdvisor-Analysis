@@ -9,8 +9,9 @@ from ApplicationLogging.logger import AppLogger
 
 class PredictionRawDataValidation:
 
-    def __init__(self, path):
+    def __init__(self, path, file):
         self.path = path
+        self.file = file
         self.schema_path = 'schema_prediction.json'
         self.logger = AppLogger()
 
@@ -21,7 +22,7 @@ class PredictionRawDataValidation:
                 dic = json.load(file)
                 file.close()
 
-            patter = dic['SampleName']
+            patter = dic['SampleFileName']
             LengthOfDateTimeStampInFile = dic['LengthOFDateStampInFile']
             ColNames = dic['ColName']
             NumberOfColumn = dic['NumberOfColumn']
@@ -57,10 +58,10 @@ class PredictionRawDataValidation:
 
     def createDirectoryForGoodBadRawData(self):
         try:
-            path = os.path.join("PredictionRawfilesValidated/", "GoodRaw/")
+            path = os.path.join("PredictionRawFilesValidated/", "GoodRaw/")
             if not os.path.exists(path):
                 os.makedirs(path)
-            path = os.path.join("PredictionRawfilesValidated/", "BadRaw/")
+            path = os.path.join("PredictionRawFilesValidated/", "BadRaw/")
             if not os.path.exists(path):
                 os.makedirs(path)
 
@@ -142,13 +143,13 @@ class PredictionRawDataValidation:
                     splitAtDot = re.split(".csv", filename)
                     splitAtDot = re.split("_", splitAtDot[0])
                     if len(splitAtDot[1]) == LengthOfDateTimeStampInFile:
-                        shutil.copy("PredictionBatchFiles/" + filename, "PredictionRawfilesValidated/GoodRaw")
+                        shutil.copy("PredictionBatchFiles/" + filename, "PredictionRawFilesValidated/GoodRaw")
                         self.logger.log(file, "Valid File name!! File moved to GoodRaw Folder :: %s" % filename)
                     else:
-                        shutil.copy("PredictionBatchFiles/" + filename, "PredictionRawfilesValidated/BadRaw")
+                        shutil.copy("PredictionBatchFiles/" + filename, "PredictionRawFilesValidated/BadRaw")
                         self.logger.log(file, "Invalid File Name!! File moved to Bad Raw Folder :: %s" % filename)
                 else:
-                    shutil.copy("PredictionBatchFiles/" + filename, "PredictionRawfilesValidated/BadRaw")
+                    shutil.copy("PredictionBatchFiles/" + filename, "PredictionRawFilesValidated/BadRaw")
                     self.logger.log(file, "Invalid File Name!! File moved to Bad Raw Folder :: %s" % filename)
 
             file.close()
@@ -163,15 +164,15 @@ class PredictionRawDataValidation:
         try:
             file = open("PredictionLogs/columnValidationLog.txt", "a+")
             self.logger.log(file,"Column Length Validation Started!!")
-            for filename in listdir("PredictionRawfilesValidated/GoodRaw"):
-                csv = pd.read_csv("PredictionRawfilesValidated/GoodRaw/" + filename)
+            for filename in listdir("PredictionRawFilesValidated/GoodRaw"):
+                csv = pd.read_csv("PredictionRawFilesValidated/GoodRaw/" + filename)
                 if csv.shape[1] > 2:
                     csv = csv.drop(['Unnamed: 2'], axis=1)
                 if csv.shape[1] == NumberOfColumn:
                     pass
                 else:
                     print(csv.columns)
-                    shutil.move("PredictionRawfilesValidated/GoodRaw/" + filename, "PredictionRawFilesValidated/BadRaw")
+                    shutil.move("PredictionRawFilesValidated/GoodRaw/" + filename, "PredictionRawFilesValidated/BadRaw")
                     self.logger.log(file, "Invalid Column Length for the file!! File moved to Bad Raw Folder :: %s" % file)
             self.logger.log(file, "Column Length Validation Completed!!")
 

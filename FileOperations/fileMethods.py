@@ -33,13 +33,14 @@ class FileOperations:
             else:
                 os.makedirs(path)
 
-            with open(path + "/" + fullFilename + ".sav", 'wb') as file:
+            with open(path + "/" + fullFilename + ".pkl", 'wb') as file:
                 pickle.dump(model, file)
+                file.close()
 
-            file = open("TrainingLogs/GeneralLogs.txt", 'a+')
-            self.logger_object.log(file,
+            logfile = open("TrainingLogs/GeneralLogs.txt", 'a+')
+            self.logger_object.log(logfile,
                 'Model File '+filename+' saved. Exited the save_model method of the Model_Finder class')
-            file.close()
+            logfile.close()
             
             return 'success'
 
@@ -49,18 +50,27 @@ class FileOperations:
                 'Model File '+filename+' could not be saved. Exited the save_model method of the Model_Finder class')
             raise Exception()
 
-    def loadModel(self, filename):
+    def loadModel(self, filename=None):
 
-        self.logger.log(self.file_object, 
+        self.logger_object.log(self.file_object,
             'Entered in the loadModel of the FileOperation class')
 
         try:
-            with open(self.modelDirectory + filename + "/" + filename + ".sav", 'rb') as file:
-            
-                self.logger_object.log(self.file_object,
-                    'Model File ' + filename + ' loaded. Exited the load_model method of the Model_Finder class')
-            
-            return pickle.load(file)
+            if filename:
+                with open(self.modelDirectory + filename + "/" + filename + ".pkl", 'rb') as file:
+
+                    self.logger_object.log(self.file_object,
+                        'Model File ' + filename + ' loaded. Exited the load_model method of the Model_Finder class')
+
+                    return pickle.load(file)
+            else:
+                model_dir = os.listdir(self.modelDirectory)
+                model_name = os.listdir(self.modelDirectory + model_dir[0])
+                model_name = model_name[0].split('.')[0]
+                with open(self.modelDirectory + model_name + "/" + model_name + ".pkl", 'rb') as file:
+                    self.logger_object.log(self.file_object,
+                                           'Exited the find_correct_model_file method of FileMethods Package')
+                    return pickle.load(file)
 
         except Exception as e:
             self.logger_object.log(self.file_object,
