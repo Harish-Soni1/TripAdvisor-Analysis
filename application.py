@@ -1,6 +1,7 @@
 from wsgiref import simple_server
 from flask import Flask,render_template,request,Response,send_file
 import os
+import pandas as pd
 import shutil
 from flask_cors import cross_origin,CORS
 from trainingModel import TrainingModel
@@ -8,6 +9,7 @@ from trainValidationInsertion import TrainValidation
 import flask_monitoringdashboard as dashboard
 from predictionValidationInsertion import PredictionValidation
 from predictionFromModel import PredictionFromModel
+from zipfile import ZipFile
 
 os.putenv('LANG', 'en_US.UTF-8')
 os.putenv('LC_ALL', 'en_US.UTF-8')
@@ -67,7 +69,30 @@ def predictBatchRoute():
     try:
         if request.method == 'POST':
             try:
+                response = 0
+
+                for file in os.listdir("PredictionLogs"):
+                    filePath = os.path.join("PredictionLogs/", file)
+                    try:
+                        if os.path.isfile(filePath) or os.path.islink(filePath):
+                            os.unlink(filePath)
+                        elif os.path.isdir(filePath):
+                            shutil.rmtree(filePath)
+                    except Exception as e:
+                        raise e
+
                 if 'batchfile[]' in request.files:
+
+                    for file in os.listdir("PredictionBatchFiles"):
+                        filePath = os.path.join("PredictionBatchFiles/", file)
+                        try:
+                            if os.path.isfile(filePath) or os.path.islink(filePath):
+                                os.unlink(filePath)
+                            elif os.path.isdir(filePath):
+                                shutil.rmtree(filePath)
+                        except Exception as e:
+                            raise e
+
                     batchFiles = request.files.getlist("batchfile[]")
                     for file in batchFiles:
                         file.save('PredictionBatchFiles/' + file.filename)
@@ -75,7 +100,13 @@ def predictBatchRoute():
                         predictionValidation.predictionValidation()
                     for file in os.listdir("PredictionBatchFiles/"):
                         prediction = PredictionFromModel()
-                        prediction.predictData(file)
+                        response = prediction.predictData(file)
+
+                    if response == 1:
+                        return Response('Bulk Batch Prediction Completed Successfully !!!')
+                    else:
+                        return Response('Error while doing Bulk Batch Prediction !!!')
+
             except Exception as e:
                 print(e)
                 raise e
@@ -83,7 +114,69 @@ def predictBatchRoute():
     except Exception as e:
         print(e)
         return Response('Error Occured::%s'%str(e))
+
+
+@application.route("/predictRow",methods=['POST'])
+@cross_origin()
+def predictRowRoute():
+    try:
+        if request.method == 'POST':
+            try:
+                if request.form is not None:
+                    if request.form['comment'] is not None:
+
+                        for file in os.listdir("PredictionLogs"):
+                            filePath = os.path.join("PredictionLogs/", file)
+                            try:
+                                if os.path.isfile(filePath) or os.path.islink(filePath):
+                                    os.unlink(filePath)
+                                elif os.path.isdir(filePath):
+                                    shutil.rmtree(filePath)
+                            except Exception as e:
+                                raise e
+
+                        comment = list()
+                        comment.append(request.form['comment'])
+                        prediction = PredictionFromModel()
+                        data = pd.DataFrame({'Comment': comment})
+                        response = prediction.PredictRowData(data)
+                        return Response(response)
+            except Exception as e:
+                raise e
+    except Exception as e:
+        print(e)
+        return Response('Error Occured::%s' % str(e))
+
+
+@application.route("/download_prediction",methods=['GET'])
+@cross_origin()
+def download_prediction():
+    try:
+        file_paths = list()
+        list_files = [i for i in os.listdir('PredictedFiles')]
+        for f in list_files:
+            file_paths.append('PredictedFiles/' + f)
+
+        if file_paths is not None:
+            with ZipFile('PredictionZip/Prediction.zip','w') as zip:
+                for file in file_paths:
+                    zip.write(file)
+
+            if os.path.exists('PredictedFiles'):
+                file = os.listdir('PredictedFiles')
+                if not len(file) == 0:
+                    for f in file:
+                        os.remove('PredictedFiles/' + f)
+            else:
+                pass
+
+        file = os.listdir('PredictionZip')[0]
+        return send_file('PredictionZip/' + file, as_attachment=True)
+
+    except Exception as e:
+        print(e)
         raise e
+
 
 if __name__ == '__main__':
     host = '0.0.0.0'

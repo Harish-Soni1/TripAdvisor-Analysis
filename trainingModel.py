@@ -5,7 +5,7 @@ from BestModelFinder import tuner
 from FileOperations import fileMethods
 from DataTransform.dataTransformation import dataTransform 
 from ApplicationLogging import logger
-from BestModelFinder import modelEvaluation
+from BestModelFinder import modelEvaluation, PDFCreation
 
 class TrainingModel:
 
@@ -68,8 +68,10 @@ class TrainingModel:
                     pass
             
             modelEvaluate = modelEvaluation.ModelEvaluation(self.trainedModelsDict, x_test, y_test, self.file_object, self.logger_object)
+            pdf = PDFCreation.PDF(self.file_object, self.logger_object)
             self.modelEvaluationReportDict =  modelEvaluate.generateModelsEvaluationReportDict(self.trainedModelsDict)
             self.orderedModelEvaluationReportDict = sorted(self.modelEvaluationReportDict.items(),key=lambda x:x[1]['F1Score'],reverse=True)
+            pdf.generatePDF(self.orderedModelEvaluationReportDict)
 
             for model in self.orderedModelEvaluationReportDict:
                 model_to_save = model

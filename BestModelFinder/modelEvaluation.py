@@ -1,4 +1,9 @@
-from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score, classification_report
+import pandas as pd
+import seaborn as sn
+import matplotlib.pyplot as plt
+import os
+
 
 class ModelEvaluation:
 
@@ -10,13 +15,13 @@ class ModelEvaluation:
         self.file_object = file_object
         self.modelEvaluationDict = {
             'nb': {'AccuracyScore': None, 'ConfusionMatrix': None, 'PrecisionScore': None, 'RecallScore': None,
-                   'F1Score': 0},
+                   'F1Score': 0, 'ClassificationReport': None},
             'rf': {'AccuracyScore': None, 'ConfusionMatrix': None, 'PrecisionScore': None, 'RecallScore': None,
-                   'F1Score': 0},
+                   'F1Score': 0, 'ClassificationReport': None},
             'xg': {'AccuracyScore': None, 'ConfusionMatrix': None, 'PrecisionScore': None, 'RecallScore': None,
-                   'F1Score': 0},
+                   'F1Score': 0, 'ClassificationReport': None},
             'bnb': {'AccuracyScore': None, 'ConfusionMatrix': None, 'PrecisionScore': None, 'RecallScore': None,
-                    'F1Score': 0}
+                    'F1Score': 0, 'ClassificationReport': None}
         }
 
 
@@ -106,6 +111,23 @@ class ModelEvaluation:
             self.logger_object.log(self.file_object, 'getF1Score method .Exited !!')
             raise e
 
+    def getClassificationReport(self, model):
+        file = open('TrainingLogs/GeneralLog.txt', 'a+')
+        self.logger_object.log(file, 'Entered getClassificationReport method for ' + str(model) + ' of ModelFinder class ')
+        file.close()
+        try:
+            y_preict = model.predict(self.testX)
+            clsReport = classification_report(self.testY, y_preict, output_dict=True)
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file, 'Successfully Executed getClassificationReport for ' + str(
+                model) + ' method of ModelFinder class ')
+            file.close()
+            return clsReport
+        except Exception as e:
+            self.logger_object.log(self.file_object, 'Exception Occured in getClassificationReport for ' + str(model) + ' ::%s' % str(e))
+            self.logger_object.log(self.file_object, 'getClassificationReport method .Exited !!')
+            raise e
+
     def generateModelsEvaluationReportDict(self,trained_models_dict):
         file = open('TrainingLogs/GeneralLog.txt', 'a+')
         self.logger_object.log(file, 'Entered generateModelsEvaluationReportDict method of Model_Evaluation class of model_evaluation package')
@@ -119,16 +141,35 @@ class ModelEvaluation:
                     self.modelEvaluationDict[model]['PrecisionScore'] = self.getPrecisionScore(object)
                     self.modelEvaluationDict[model]['RecallScore'] = self.getRecallScore(object)
                     self.modelEvaluationDict[model]['F1Score'] = self.getF1Score(object)
+                    self.modelEvaluationDict[model]['ClassificationReport'] = self.getClassificationReport(object)
+                    self.generateImage(self.getConfusionMatrix(object), model)
 
             file = open('TrainingLogs/GeneralLog.txt', 'a+')
-            self.logger_object.log(file, 'Successfully Executed generate_model_evaluation_report_dict() for method of Model_Evaluation class of model_evaluation package')
+            self.logger_object.log(file, 'Successfully Executed generateModelsEvaluationReportDict for method of Model_Evaluation class of model_evaluation package')
             file.close()
 
             self.logger_object.log(self.file_object,'Model Evaluation Report is :: %s' %str(self.modelEvaluationDict))
             return self.modelEvaluationDict
         except Exception as e:
-            self.logger_object.log(self.file_object,'Exception Occured in generate_model_evaluation_report_dict() ')
-            self.logger_object.log(self.file_object, 'getF1Score method .Exited !!')
+            self.logger_object.log(self.file_object,'Exception Occured in generateModelsEvaluationReportDict ')
+            self.logger_object.log(self.file_object, 'generateModelsEvaluationReportDict method .Exited !!')
             raise e
 
+    def generateImage(self, matrix, model):
+        file = open('TrainingLogs/GeneralLog.txt', 'a+')
+        self.logger_object.log(file,
+            'Entered generateImage method of Model_Evaluation class of model_evaluation package')
+        file.close()
+        try:
+            classes = ["0", "1", "2"]
+            df_cfm = pd.DataFrame(matrix, index=classes, columns=classes)
+            plt.figure(figsize=(10, 10))
+            cfm_plot = sn.heatmap(df_cfm, annot=True)
+            fileName = model + "_" + "confusion_matrix.png"
+            path = os.path.join("Documents/" + fileName)
+            cfm_plot.figure.savefig(path)
 
+        except Exception as e:
+            self.logger_object.log(self.file_object, 'Exception Occured in generateImage() ')
+            self.logger_object.log(self.file_object, 'generateImage method .Exited !!')
+            raise e

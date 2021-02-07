@@ -81,7 +81,7 @@ class RawDataValidation:
             file = open("TrainingLogs/GeneralLog.txt", 'a+')
             self.logger.log(file,"Error while Deleting Directory : %s" %s)
             file.close()
-            raise OSError
+            raise s
 
     def deleteExistingBadDataTrainingFolder(self):
         try:
