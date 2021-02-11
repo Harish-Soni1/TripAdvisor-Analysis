@@ -21,7 +21,21 @@ CORS(application)
 @application.route("/",methods=['GET'])
 @cross_origin()
 def home():
-    return render_template('index.html')
+    already_exist = None
+    if os.path.exists('Models/'):
+        file = os.listdir('Models/')
+        if 'SupportVectorMachine' in file:
+            exist = 'svm'
+        elif 'RandomForest' in file:
+            exist = 'rf'
+        elif 'XGBoost' in file:
+            exist = 'xg'
+        elif 'BaggingMultinomialNB' in file:
+            exist = 'bnb'
+        else:
+            exist = 'none'
+        already_exist = {'model': exist}
+    return render_template('index.html', already_exist=already_exist)
 
 @application.route("/trainModel",methods=['POST'])
 @cross_origin()

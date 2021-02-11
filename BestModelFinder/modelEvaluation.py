@@ -14,7 +14,7 @@ class ModelEvaluation:
         self.logger_object = logger_object
         self.file_object = file_object
         self.modelEvaluationDict = {
-            'nb': {'AccuracyScore': None, 'ConfusionMatrix': None, 'PrecisionScore': None, 'RecallScore': None,
+            'svm': {'AccuracyScore': None, 'ConfusionMatrix': None, 'PrecisionScore': None, 'RecallScore': None,
                    'F1Score': 0, 'ClassificationReport': None},
             'rf': {'AccuracyScore': None, 'ConfusionMatrix': None, 'PrecisionScore': None, 'RecallScore': None,
                    'F1Score': 0, 'ClassificationReport': None},
@@ -164,7 +164,7 @@ class ModelEvaluation:
             classes = ["0", "1", "2"]
             df_cfm = pd.DataFrame(matrix, index=classes, columns=classes)
             plt.figure(figsize=(10, 10))
-            cfm_plot = sn.heatmap(df_cfm, annot=True)
+            cfm_plot = sn.heatmap(df_cfm, annot=True, fmt='g')
             fileName = model + "_" + "confusion_matrix.png"
             path = os.path.join("Documents/" + fileName)
             cfm_plot.figure.savefig(path)

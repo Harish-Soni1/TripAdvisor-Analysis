@@ -22,7 +22,7 @@ class FileOperations:
             elif filename == 'xg':
                 fullFilename = 'XGBoost'
             elif filename == 'bnb':
-                fullFilename = 'BaggingGaussianNB'
+                fullFilename = 'BaggingMultinomialNB'
             else:
                 fullFilename = filename
 
