@@ -22,6 +22,15 @@ class PDF:
             for data in dict:
                 if data[1]['AccuracyScore'] is not None:
 
+                    if data[0] == 'svm':
+                        model = "Support Vector Machine Classifier"
+                    elif data[0] == 'rf':
+                        model = "Random Forest"
+                    elif data[0] == 'xgb':
+                        model = "XGBoost"
+                    else:
+                        model = "Bagging Classifier"
+
                     accuracyScore = data[1]['AccuracyScore']
                     precisionScore = data[1]['PrecisionScore']
                     recallScore = data[1]['RecallScore']
@@ -43,6 +52,8 @@ class PDF:
                     self.pdf.cell(75, 10, "Sentimental Analysis", 0, 2, 'C')
                     self.pdf.cell(90, 10, '', 0, 2, 'C')
                     self.pdf.cell(-55)
+                    self.pdf.cell(60)
+                    # self.pdf.cell(75, 10, str(model), 0, 2, 'C')
                     self.pdf.set_xy(70.0, 30.0)
                     self.pdf.set_font("Arial", 'B', 12)
                     self.pdf.cell(45, 10, "Accuracy Score is: ", 1, 0, 'C')

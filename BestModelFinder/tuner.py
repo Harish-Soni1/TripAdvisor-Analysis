@@ -23,8 +23,8 @@ class ModelFinder:
         self.logger_object.log(self.file_object, 'entered in the getBestParamsForRandomForest of the ModelFinder class')
         try:
             self.paramaGrid = {
-                'n_estimators': [10,50,100,130], 'criterion': ['gini','entropy'],
-                'max_depth': range(2,5,1), 'max_features': ['auto', 'log2']
+                'n_estimators': [10, 50, 100, 130], 'criterion': ['gini', 'entropy'],
+                'max_depth': range(2, 5, 1), 'max_features': ['auto', 'log2']
             }
             self.grid = GridSearchCV(estimator = self.rfCl, param_grid = self.paramaGrid, cv = 5, verbose = 3)
             self.grid.fit(trainX, trainY)
