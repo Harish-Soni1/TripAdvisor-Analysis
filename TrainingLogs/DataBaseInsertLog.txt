@@ -1,2 +1,0 @@
-2021-02-13/00:00:00		Data Deletion Successfully!!
-2021-02-13/00:00:00		Insertion in Collection Successfully.

@@ -1,3 +1,0 @@
-2021-02-13/00:00:00		Entered trainModel method of PredictionModel class
-2021-02-13/00:00:00		Review Cleaning Seuccesfull. Exited to the cleanReview of the Preprocessor class
-2021-02-13/00:00:00		Remove StopWords Succesfull. Exited to the removeStopWords of the Preprocessor class
