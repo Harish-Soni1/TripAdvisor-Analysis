@@ -161,13 +161,19 @@ class ModelEvaluation:
             'Entered generateImage method of Model_Evaluation class of model_evaluation package')
         file.close()
         try:
-            classes = ["0", "1", "2"]
+            classes = ["negative", "neutral", "positive"]
             df_cfm = pd.DataFrame(matrix, index=classes, columns=classes)
             plt.figure(figsize=(10, 10))
-            cfm_plot = sn.heatmap(df_cfm, annot=True, fmt='g')
+            plt.rcParams.update({'font.size': 20})
+            cfm_plot = sn.heatmap(df_cfm, fmt='g', annot=True, cmap='coolwarm', linecolor='white', linewidths=1)
             fileName = model + "_" + "confusion_matrix.png"
             path = os.path.join("Documents/" + fileName)
             cfm_plot.figure.savefig(path)
+
+            file = open('TrainingLogs/GeneralLog.txt', 'a+')
+            self.logger_object.log(file, 'Successfully Executed generateImage for ' + str(
+                model) + ' method of ModelFinder class ')
+            file.close()
 
         except Exception as e:
             self.logger_object.log(self.file_object, 'Exception Occured in generateImage() ')

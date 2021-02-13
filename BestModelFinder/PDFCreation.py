@@ -49,38 +49,40 @@ class PDF:
                     self.pdf.rect(5.0, 5.0, 200.0, 287.0)
                     self.pdf.rect(8.0, 8.0, 194.0, 282.0)
                     self.pdf.cell(60)
+                    self.pdf.set_xy(65.0, 15.0)
                     self.pdf.cell(75, 10, "Sentimental Analysis", 0, 2, 'C')
                     self.pdf.cell(90, 10, '', 0, 2, 'C')
                     self.pdf.cell(-55)
                     self.pdf.cell(60)
-                    # self.pdf.cell(75, 10, str(model), 0, 2, 'C')
-                    self.pdf.set_xy(70.0, 30.0)
+                    self.pdf.set_xy(65.0, 30.0)
+                    self.pdf.cell(75, 10, str(model), 0, 2, 'C')
+                    self.pdf.set_xy(70.0, 45.0)
                     self.pdf.set_font("Arial", 'B', 12)
                     self.pdf.cell(45, 10, "Accuracy Score is: ", 1, 0, 'C')
                     self.pdf.cell(20, 10, str(round(accuracyScore, 4)), 1, 1, 'C')
-                    self.pdf.set_xy(70.0, 40.0)
+                    self.pdf.set_xy(70.0, 55.0)
                     self.pdf.cell(45, 10, "Precision Score is: ", 1, 0, 'C')
                     self.pdf.cell(20, 10, str(round(precisionScore, 4)), 1, 1, 'C')
-                    self.pdf.set_xy(70.0, 50.0)
+                    self.pdf.set_xy(70.0, 65.0)
                     self.pdf.cell(45, 10, "Recall Score is: ", 1, 0, 'C')
                     self.pdf.cell(20, 10, str(round(recallScore, 4)), 1, 1, 'C')
-                    self.pdf.set_xy(70.0, 60.0)
+                    self.pdf.set_xy(70.0, 75.0)
                     self.pdf.cell(45, 10, "F1Score is: ", 1, 0, 'C')
                     self.pdf.cell(20, 10, str(round(f1Score, 4)), 1, 1, 'C')
                     self.pdf.cell(60)
-                    self.pdf.set_xy(15.0, 80.0)
+                    self.pdf.set_xy(15.0, 90.0)
                     self.pdf.cell(60)
                     self.pdf.set_font("Arial", 'B', 15)
                     self.pdf.cell(60, 15, txt="Classification Report", ln=1, align='C')
 
-                    self.pdf.set_xy(35.0, 95.0)
+                    self.pdf.set_xy(35.0, 105.0)
                     self.pdf.set_font("Arial", 'B', 12)
                     colNameList = list(newData.columns)
                     for name in colNameList:
                         self.pdf.cell(35, 10, name, 1, 0, 'C')
 
                     self.pdf.cell(-105)
-                    self.pdf.set_xy(35.0, 105.0)
+                    self.pdf.set_xy(35.0, 115.0)
 
                     for row in range(0, len(newData)):
                         for colNum, colName in enumerate(colNameList):
@@ -91,14 +93,14 @@ class PDF:
                                 self.pdf.cell(-105)
 
                     self.pdf.cell(60)
-                    self.pdf.set_xy(57.0, 140.0)
+                    self.pdf.set_xy(70.0, 150.0)
                     self.pdf.set_font("Arial", 'B', 15)
-                    self.pdf.cell(60, 15, txt="Classification Report", ln=1, align='C')
+                    self.pdf.cell(60, 15, txt="Confusion Matrix", ln=1, align='C')
 
                     for image in os.listdir("Documents/"):
                         if image.split("_")[0] == data[0]:
-                            self.pdf.set_xy(30.0, 150.0)
-                            self.pdf.image("Documents/" + image, x=None, y=None, w=800 / 5, h=500 / 5, link='', type='')
+                            self.pdf.set_xy(30.0, 160.0)
+                            self.pdf.image("Documents/" + image, x=None, y=None, w=600 / 5, h=300 / 5, link='', type='')
 
             self.pdf.output("Documents/EvaluationReport.pdf")
 

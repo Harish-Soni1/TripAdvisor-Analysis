@@ -152,7 +152,7 @@ def predictRowRoute():
                         comment = list()
                         comment.append(request.form['comment'])
                         prediction = PredictionFromModel()
-                        data = pd.DataFrame({'Comment': comment})
+                        data = pd.DataFrame({'Comments': comment})
                         response = prediction.PredictRowData(data)
                         return Response(response)
             except Exception as e:

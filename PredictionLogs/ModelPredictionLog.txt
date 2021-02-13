@@ -1,0 +1,10 @@
+2021-02-13/00:00:00		Entered in the cleanReviews of the Preproseccor class
+2021-02-13/00:00:00		Entered in the removeStopWords of the Preprocessor class
+2021-02-13/00:00:00		Entered in the Lemmatizer of the Preprocessor class
+2021-02-13/00:00:00		Entered in the loadModel of the FileOperation class
+2021-02-13/00:00:00		Model File Vectorizer loaded. Exited the load_model method of the Model_Finder class
+2021-02-13/00:00:00		Entered in the loadModel of the FileOperation class
+2021-02-13/00:00:00		Model File TFIDFTransformer loaded. Exited the load_model method of the Model_Finder class
+2021-02-13/00:00:00		Entered in the loadModel of the FileOperation class
+2021-02-13/00:00:00		Exited the find_correct_model_file method of FileMethods Package
+2021-02-13/00:00:00		Successfull End of Prediction !!!

@@ -37,7 +37,7 @@ class FileOperations:
                 pickle.dump(model, file)
                 file.close()
 
-            logfile = open("TrainingLogs/GeneralLogs.txt", 'a+')
+            logfile = open("TrainingLogs/GeneralLog.txt", 'a+')
             self.logger_object.log(logfile,
                 'Model File '+filename+' saved. Exited the save_model method of the Model_Finder class')
             logfile.close()

@@ -1,0 +1,18 @@
+2021-02-13/00:00:00		Invalid File Name!! File moved to Bad Raw Folder :: Review1611.csv
+2021-02-13/00:00:00		Invalid File Name!! File moved to Bad Raw Folder :: Reviews_1611239463.csv
+2021-02-13/00:00:00		Invalid File Name!! File moved to Bad Raw Folder :: Review_16112.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239103.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239163.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239223.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239283.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239343.csv
+2021-02-13/00:00:00		Invalid File Name!! File moved to Bad Raw Folder :: Review_16112394.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239403.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239463.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239523.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239583.csv
+2021-02-13/00:00:00		Invalid File Name!! File moved to Bad Raw Folder :: Review_161123958375.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239643.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239704.csv
+2021-02-13/00:00:00		Valid File name!! File moved to GoodRaw Folder :: Review_1611239899.csv
+2021-02-13/00:00:00		Invalid File Name!! File moved to Bad Raw Folder :: Revw_1239643.csv

@@ -1,0 +1,2 @@
+2021-02-13/00:00:00		LengthOfDateTimeStampInFile:: 10	 NumberofColumns:: 2
+
